@@ -16,3 +16,6 @@ extern vector<string> getAllPossibleMoves(GameState &myState);
 
 extern void getPawnMoves(GameState &myState, int row, int col,
                          vector<string> &validMoves);
+
+extern void getRookMoves(GameState &myState, int row, int col,
+                         vector<string> &validMoves);

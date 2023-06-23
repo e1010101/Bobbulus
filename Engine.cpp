@@ -8,7 +8,6 @@ using std::cout;
 using std::endl;
 
 string makeMove(GameState &myState) {
-  myState.printBoard();
   cout << myState.colorToMove << endl;
   if (myState.moves.size() % 2 == 0) {
     myState.colorToMove = 0;
@@ -25,7 +24,8 @@ string makeMove(GameState &myState) {
     myState.printBoard();
     return validMoves[0];
   }
-  return getMoveString(0, 4, 2, 4);
+  // e2e4
+  return getMoveString(6, 4, 4, 4);
 }
 
 vector<string> getValidMoves(GameState &myState) {
@@ -38,46 +38,88 @@ vector<string> getAllPossibleMoves(GameState &myState) {
     for (int j = 0; j < 8; j++) {
       if (myState.getColorOfPiece(i, j) == myState.colorToMove) {
         if (tolower(myState.getPieceAtSquare(i, j)) == 'p') {
-          getPawnMoves(myState, i, j, moves);
+          // getPawnMoves(myState, i, j, moves);
+        } else if (tolower(myState.getPieceAtSquare(i, j)) == 'r') {
+          getRookMoves(myState, i, j, moves);
         }
       }
     }
   }
+  // for (int i = 0; i < moves.size(); i++) {
+  //   cout << moves[i] << endl;
+  // }
   return moves;
 }
 
 void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
   // WHITE PAWN MOVES
+  // MOVE FORWARD + MOVE FORWARD TWICE
   if (myState.colorToMove == 0) {
     if (myState.board[row - 1][col] == '-') {
       moves.push_back(getMoveString(row, col, row - 1, col));
-      if (myState.board[row - 2][col] == '-') {
+      if (row == 6 && myState.board[row - 2][col] == '-') {
         moves.push_back(getMoveString(row, col, row - 2, col));
       }
     }
+    // CAPTURES
     if (col - 1 >= 0) {
       if (myState.getColorOfPiece(row - 1, col - 1) == 1) {
         moves.push_back(getMoveString(row, col, row - 1, col - 1));
       }
     }
+    if (col + 1 < 8) {
+      if (myState.getColorOfPiece(row - 1, col + 1) == 1) {
+        moves.push_back(getMoveString(row, col, row - 1, col + 1));
+      }
+    }
   } else {
+    // BLACK PAWN MOVES
+    // MOVE FORWARD + MOVE FORWARD TWICE
     if (myState.board[row + 1][col] == '-') {
       moves.push_back(getMoveString(row, col, row + 1, col));
-      if (myState.board[row + 2][col] == '-') {
+      if (row == 1 && myState.board[row + 2][col] == '-') {
         moves.push_back(getMoveString(row, col, row + 2, col));
       }
     }
+    // CAPTURES
     if (col - 1 >= 0) {
       if (myState.getColorOfPiece(row + 1, col - 1) == 1) {
         moves.push_back(getMoveString(row, col, row + 1, col - 1));
       }
     }
+    if (col + 1 < 8) {
+      if (myState.getColorOfPiece(row + 1, col + 1) == 1) {
+        moves.push_back(getMoveString(row, col, row + 1, col + 1));
+      }
+    }
   }
 }
 
-void getRookMoves(GameState &myState, vector<string> &validMoves) {
-  // WHITE ROOK MOVES
-  if (myState.colorToMove == 0) {
-  } else {
+void getRookMoves(GameState &myState, int row, int col,
+                  vector<string> &validMoves) {
+  vector<vector<int>> directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+  int enemyColor = 1 - myState.colorToMove;
+  for (int d = 0; d < directions.size(); d++) {
+    for (int i = 1; i < 8; i++) {
+      int endRow = row + directions[d][0] * i;
+      int endCol = col + directions[d][1] * i;
+
+      if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
+        if (myState.getPieceAtSquare(endRow, endCol) == '-') {
+          // MOVEMENT
+          cout << "endRow: " << endRow << " endCol: " << endCol << endl;
+          validMoves.push_back(getMoveString(row, col, endRow, endCol));
+        } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
+          // CAPTURES
+          // cout << "endRow: " << endRow << " endCol: " << endCol << endl;
+          validMoves.push_back(getMoveString(row, col, endRow, endCol));
+          break;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
   }
 }

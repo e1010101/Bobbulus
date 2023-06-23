@@ -14,7 +14,7 @@ GameState::GameState() : colorToMove(0) {
   board[0][5] = 'b';
   board[0][6] = 'n';
   board[0][7] = 'r';
-  for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 8; i++) {
     board[1][i] = 'p';
   }
 
@@ -26,12 +26,12 @@ GameState::GameState() : colorToMove(0) {
   board[7][5] = 'B';
   board[7][6] = 'N';
   board[7][7] = 'R';
-  for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 8; i++) {
     board[6][i] = 'P';
   }
 
-  for (int rank = 2; rank < 6; ++rank) {
-    for (int file = 0; file < 8; ++file) {
+  for (int rank = 2; rank < 6; rank++) {
+    for (int file = 0; file < 8; file++) {
       board[rank][file] = '-';
     }
   }
@@ -57,8 +57,8 @@ int GameState::getColorOfPiece(int rank, int file) {
 }
 
 void GameState::printBoard() {
-  for (int rank = 0; rank < 8; ++rank) {
-    for (int file = 0; file < 8; ++file) {
+  for (int rank = 0; rank < 8; rank++) {
+    for (int file = 0; file < 8; file++) {
       cout << board[rank][file] << " ";
     }
     cout << endl;
@@ -96,8 +96,9 @@ void parsePosition(GameState &myState, string InputFromGUI) {
     ss >> token; // moves
 
     while (ss >> token) {
-      currentTurn = currentTurn == 0 ? 1 : 0;
+      myState.updateBoard(token);
       myState.moves.push_back(token);
+      currentTurn = currentTurn == 0 ? 1 : 0;
     }
 
     myState.colorToMove = currentTurn;
