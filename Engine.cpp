@@ -38,13 +38,22 @@ vector<string> getAllPossibleMoves(GameState &myState) {
     for (int j = 0; j < 8; j++) {
       if (myState.getColorOfPiece(i, j) == myState.colorToMove) {
         if (tolower(myState.getPieceAtSquare(i, j)) == 'p') {
-          // getPawnMoves(myState, i, j, moves);
+          getPawnMoves(myState, i, j, moves);
         } else if (tolower(myState.getPieceAtSquare(i, j)) == 'r') {
           getRookMoves(myState, i, j, moves);
+        } else if (tolower(myState.getPieceAtSquare(i, j)) == 'b') {
+          getBishopMoves(myState, i, j, moves);
+        } else if (tolower(myState.getPieceAtSquare(i, j)) == 'n') {
+          getKnightMoves(myState, i, j, moves);
+        } else if (tolower(myState.getPieceAtSquare(i, j)) == 'q') {
+          getQueenMoves(myState, i, j, moves);
+        } else if (tolower(myState.getPieceAtSquare(i, j)) == 'k') {
+          // getKingMoves(myState, i, j, moves);
         }
       }
     }
   }
+  cout << "Number of moves: " << moves.size() << endl;
   // for (int i = 0; i < moves.size(); i++) {
   //   cout << moves[i] << endl;
   // }
@@ -122,4 +131,57 @@ void getRookMoves(GameState &myState, int row, int col,
       }
     }
   }
+}
+
+void getBishopMoves(GameState &myState, int row, int col,
+                    vector<string> &validMoves) {
+  vector<vector<int>> directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+  int enemyColor = 1 - myState.colorToMove;
+  for (int d = 0; d < directions.size(); d++) {
+    for (int i = 1; i < 8; i++) {
+      int endRow = row + directions[d][0] * i;
+      int endCol = col + directions[d][1] * i;
+
+      if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
+        if (myState.getPieceAtSquare(endRow, endCol) == '-') {
+          // MOVEMENT
+          cout << "endRow: " << endRow << " endCol: " << endCol << endl;
+          validMoves.push_back(getMoveString(row, col, endRow, endCol));
+        } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
+          // CAPTURES
+          // cout << "endRow: " << endRow << " endCol: " << endCol << endl;
+          validMoves.push_back(getMoveString(row, col, endRow, endCol));
+          break;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+}
+
+void getKnightMoves(GameState &myState, int row, int col,
+                    vector<string> &validMoves) {
+  vector<vector<int>> directions = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
+                                    {1, -2},  {1, 2},  {2, -1},  {2, 1}};
+  int enemyColor = 1 - myState.colorToMove;
+  for (int d = 0; d < directions.size(); d++) {
+    int endRow = row + directions[d][0];
+    int endCol = col + directions[d][1];
+
+    if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
+      if (myState.getColorOfPiece(endRow, endCol) == enemyColor ||
+          myState.getPieceAtSquare(endRow, endCol) == '-') {
+        validMoves.push_back(getMoveString(row, col, endRow, endCol));
+      }
+    }
+  }
+}
+
+void getQueenMoves(GameState &myState, int row, int col,
+                   vector<string> &validMoves) {
+  getRookMoves(myState, row, col, validMoves);
+  getBishopMoves(myState, row, col, validMoves);
 }
