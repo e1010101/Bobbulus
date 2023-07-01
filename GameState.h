@@ -15,7 +15,12 @@ private:
 public:
   char board[8][8];
   int colorToMove;
+  vector<int> whiteKingLocation = {7, 4};
+  vector<int> blackKingLocation = {0, 4};
   vector<string> moves;
+  vector<string> pins;
+  vector<string> checks;
+  bool inCheck;
 
   GameState();
 

@@ -4,7 +4,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-GameState::GameState() : colorToMove(0) {
+GameState::GameState() : colorToMove(0), inCheck(false), pins({}), checks({}) {
 
   board[0][0] = 'r';
   board[0][1] = 'n';
@@ -66,7 +66,7 @@ void GameState::printBoard() {
 }
 
 char GameState::getPieceAtSquare(int rank, int file) {
-  return board[rank][file];
+  return tolower(board[rank][file]);
 }
 
 string getSquareNotation(int rank, int file) {
