@@ -4,7 +4,8 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-GameState::GameState() : colorToMove(0), inCheck(false), pins({}), checks({}) {
+GameState::GameState()
+    : colorToMove(0), inCheck(false), moves({}), pins({}), checks({}) {
 
   board[0][0] = 'r';
   board[0][1] = 'n';
@@ -90,12 +91,18 @@ void parsePosition(GameState &myState, string InputFromGUI) {
     stringstream ss(InputFromGUI);
     string token;
     int currentTurn = myState.colorToMove;
+    int numMovesMave = myState.moves.size();
+    int movesCounter = 0;
 
     ss >> token; // position
     ss >> token; // startpos
     ss >> token; // moves
 
     while (ss >> token) {
+      if (movesCounter < numMovesMave) {
+        movesCounter++;
+        continue;
+      }
       myState.updateBoard(token);
       myState.moves.push_back(token);
       currentTurn = currentTurn == 0 ? 1 : 0;

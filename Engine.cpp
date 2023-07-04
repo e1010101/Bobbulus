@@ -8,7 +8,7 @@ using std::cout;
 using std::endl;
 
 string makeMove(GameState &myState) {
-  cout << myState.colorToMove << endl;
+  // cout << myState.colorToMove << endl;
   if (myState.moves.size() % 2 == 0) {
     myState.colorToMove = 0;
   } else {
@@ -16,7 +16,7 @@ string makeMove(GameState &myState) {
   }
 
   vector<string> validMoves = getValidMoves(myState);
-  cout << "Number of valid moves: " << validMoves.size() << endl;
+  // cout << "Number of valid moves: " << validMoves.size() << endl;
   if (validMoves.size() > 0) {
     myState.colorToMove = 1 - myState.colorToMove;
     myState.moves.push_back(validMoves[0]);

@@ -21,10 +21,9 @@ void UciLoop() {
       cout << "readyok" << endl;
     else if (InputFromGUI == "uci") {
       cout << "id name Bobbulus" << endl;
-      cout << "id author Ezra" << endl;
       cout << "uciok" << endl;
     } else if (InputFromGUI.substr(0, 2) == "go") {
-      cout << makeMove(myState) << endl;
+      cout << "bestmove " + makeMove(myState) << endl;
     } else if (InputFromGUI.substr(0, 8) == "position") {
       parsePosition(myState, InputFromGUI);
       // string col = MyBoard.colorToMove == 0 ? "white" : "black";
