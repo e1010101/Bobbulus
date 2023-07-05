@@ -39,12 +39,29 @@ GameState::GameState()
 }
 
 void GameState::updateBoard(string move) {
-  int rank1 = 7 - (move[1] - '1');
-  int file1 = move[0] - 'a';
-  int rank2 = 7 - (move[3] - '1');
-  int file2 = move[2] - 'a';
-  board[rank2][file2] = board[rank1][file1];
-  board[rank1][file1] = '-';
+  if (move.length() == 4) {
+    int rank1 = 7 - (move[1] - '1');
+    int file1 = move[0] - 'a';
+    int rank2 = 7 - (move[3] - '1');
+    int file2 = move[2] - 'a';
+    board[rank2][file2] = board[rank1][file1];
+    board[rank1][file1] = '-';
+  } else if (move.length() == 5) {
+    // PAWN PROMOTION
+    string piece = move.substr(4, 1);
+    cout << piece << endl;
+    int rank1 = 7 - (move[1] - '1');
+    int file1 = move[0] - 'a';
+    int rank2 = 7 - (move[3] - '1');
+    int file2 = move[2] - 'a';
+
+    if (colorToMove == 0 && rank2 == 0) {
+      board[rank2][file2] = 'Q';
+    } else if (colorToMove == 1 && rank2 == 7) {
+      board[rank2][file2] = 'q';
+    }
+    board[rank1][file1] = '-';
+  }
 }
 
 int GameState::getColorOfPiece(int rank, int file) {

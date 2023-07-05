@@ -19,9 +19,8 @@ string makeMove(GameState &myState) {
   // cout << "Number of valid moves: " << validMoves.size() << endl;
   if (validMoves.size() > 0) {
     myState.colorToMove = 1 - myState.colorToMove;
-    myState.moves.push_back(validMoves[0]);
-    myState.updateBoard(validMoves[0]);
-    myState.printBoard();
+    string moveToMake = validMoves[0];
+    handleMove(myState, moveToMake);
     return validMoves[0];
   }
   // e2e4
@@ -116,6 +115,35 @@ vector<string> getAllPossibleMoves(GameState &myState) {
   return moves;
 }
 
+void handleMove(GameState &myState, string move) {
+  string startSq = move.substr(0, 2);
+  string endSq = move.substr(2, 2);
+
+  // UPDATE KING POSITION
+  if (myState.getPieceAtSquare(startSq[0] - '0', startSq[1] - '0') == 'k') {
+    if (myState.colorToMove == 0) {
+      myState.whiteKingLocation[0] = endSq[0] - '0';
+      myState.whiteKingLocation[1] = endSq[1] - '0';
+    } else {
+      myState.blackKingLocation[0] = endSq[0] - '0';
+      myState.blackKingLocation[1] = endSq[1] - '0';
+    }
+  }
+
+  // PAWN PROMOTION
+  if (myState.getPieceAtSquare(startSq[0] - '0', startSq[1] - '0') == 'p') {
+    if (myState.colorToMove == 0 && endSq[1] == '8') {
+      myState.board[endSq[0] - '0'][endSq[1] - '0'] = 'Q';
+    } else if (myState.colorToMove == 1 && endSq[1] == '1') {
+      myState.board[endSq[0] - '0'][endSq[1] - '0'] = 'q';
+    }
+  }
+
+  myState.moves.push_back(move);
+  myState.updateBoard(move);
+  myState.printBoard();
+}
+
 void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
   // WHITE PAWN MOVES
 
@@ -173,7 +201,6 @@ void getRookMoves(GameState &myState, int row, int col,
       if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
         if (myState.getPieceAtSquare(endRow, endCol) == '-') {
           // MOVEMENT
-          cout << "endRow: " << endRow << " endCol: " << endCol << endl;
           validMoves.push_back(getMoveString(row, col, endRow, endCol));
         } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
           // CAPTURES

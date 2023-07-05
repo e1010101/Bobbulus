@@ -14,6 +14,8 @@ extern vector<string> getValidMoves(GameState &myState);
 
 extern vector<string> getAllPossibleMoves(GameState &myState);
 
+extern void handleMove(GameState &myState, string move);
+
 extern void getPawnMoves(GameState &myState, int row, int col,
                          vector<string> &validMoves);
 
