@@ -18,8 +18,8 @@ public:
   vector<int> whiteKingLocation = {7, 4};
   vector<int> blackKingLocation = {0, 4};
   vector<string> moves;
-  vector<string> pins;
-  vector<string> checks;
+  vector<vector<int>> pins;
+  vector<vector<int>> checks;
   bool inCheck;
 
   GameState();
@@ -34,6 +34,8 @@ public:
 };
 
 extern string getSquareNotation(int rank, int file);
+
+extern vector<int> getBoardCoordsFromMove(string move);
 
 extern string getMoveString(int rank1, int file1, int rank2, int file2);
 

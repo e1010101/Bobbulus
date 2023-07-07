@@ -55,10 +55,11 @@ void GameState::updateBoard(string move) {
     int rank2 = 7 - (move[3] - '1');
     int file2 = move[2] - 'a';
 
-    if (colorToMove == 0 && rank2 == 0) {
-      board[rank2][file2] = 'Q';
-    } else if (colorToMove == 1 && rank2 == 7) {
-      board[rank2][file2] = 'q';
+    // WE SWAPPED COLORS FIRST
+    if (colorToMove == 0) {
+      board[rank2][file2] = (char)tolower(piece[0]);
+    } else if (colorToMove == 1) {
+      board[rank2][file2] = (char)toupper(piece[0]);
     }
     board[rank1][file1] = '-';
   }
@@ -95,6 +96,15 @@ string getSquareNotation(int rank, int file) {
   return notation;
 }
 
+vector<int> getBoardCoordsFromMove(string move) {
+  vector<int> coords;
+  coords.push_back(move[0] - 'a');
+  coords.push_back(7 - (move[1] - '1'));
+  coords.push_back(move[2] - 'a');
+  coords.push_back(7 - (move[3] - '1'));
+  return coords;
+}
+
 string getMoveString(int rank1, int file1, int rank2, int file2) {
   return getSquareNotation(rank1, file1) + getSquareNotation(rank2, file2);
 }
@@ -116,13 +126,13 @@ void parsePosition(GameState &myState, string InputFromGUI) {
     ss >> token; // moves
 
     while (ss >> token) {
+      myState.colorToMove = currentTurn == 0 ? 1 : 0;
       if (movesCounter < numMovesMave) {
         movesCounter++;
         continue;
       }
       myState.updateBoard(token);
       myState.moves.push_back(token);
-      currentTurn = currentTurn == 0 ? 1 : 0;
     }
 
     myState.colorToMove = currentTurn;

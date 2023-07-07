@@ -28,7 +28,10 @@ string makeMove(GameState &myState) {
 }
 
 vector<string> getValidMoves(GameState &myState) {
-  vector<string> moves;
+  vector<string> validMoves;
+  checkForPinsAndChecks(myState);
+  cout << "In check: " << myState.inCheck << endl;
+  cout << "Number of checks: " << myState.checks.size() << endl;
   int kingRow, kingCol;
   if (myState.colorToMove == 0) {
     kingRow = myState.whiteKingLocation[0];
@@ -40,29 +43,33 @@ vector<string> getValidMoves(GameState &myState) {
 
   if (myState.inCheck) {
     if (myState.checks.size() == 1) {
-      moves = getAllPossibleMoves(myState);
-      string check = myState.checks[0];
-      int checkRow = check[0] - '0';
-      int checkCol = check[1] - '0';
+      vector<string> possibleMoves = getAllPossibleMoves(myState);
+      vector<int> check = myState.checks[0];
+      cout << "Check: " << check[0] << " " << check[1] << " " << check[2] << " "
+           << check[3] << endl;
+      int checkRow = check[0];
+      int checkCol = check[1];
       char pieceChecking = myState.getPieceAtSquare(checkRow, checkCol);
       vector<vector<int>> validSquares = {};
       if (pieceChecking == 'n') {
         validSquares = {{checkRow, checkCol}};
       } else {
-        for (int i = 0; i < 8; i++) {
-          vector<int> validSquare = {(kingRow + (check[2] - '0') * i),
-                                     (kingCol + (check[3] - '0') * i)};
+        for (int i = 1; i < 8; i++) {
+          vector<int> validSquare = {kingRow + (check[2]) * i,
+                                     kingCol + (check[3]) * i};
           validSquares.push_back(validSquare);
           if (validSquare[0] == checkRow && validSquare[1] == checkCol) {
             break;
           }
         }
       }
-      for (int i = 0; i < moves.size(); i++) {
-        if (myState.getPieceAtSquare(moves[i][2] - '0', moves[i][3] - '0') !=
-            'k') {
-          int moveEndRow = moves[i][2] - '0';
-          int moveEndCol = moves[i][3] - '0';
+
+      for (int i = possibleMoves.size() - 1; i >= 0; i--) {
+        // IF THE PIECE THAT MOVED IS NOT THE KING
+        if (myState.getPieceAtSquare(possibleMoves[i][0] - 'a',
+                                     possibleMoves[i][1] - '1') != 'k') {
+          int moveEndRow = possibleMoves[i][2] - 'a';
+          int moveEndCol = possibleMoves[i][3] - '1';
           bool validEndSquare = false;
           for (int j = 0; j < validSquares.size(); j++) {
             if (moveEndRow == validSquares[j][0] &&
@@ -73,70 +80,83 @@ vector<string> getValidMoves(GameState &myState) {
           }
 
           if (!validEndSquare) {
-            moves.erase(moves.begin() + i);
-            i--;
+            possibleMoves.erase(possibleMoves.begin() + i);
           }
         }
       }
+      validMoves = possibleMoves;
     } else {
       getKingMoves(myState, kingRow, kingCol, myState.moves);
     }
   } else {
-    moves = getAllPossibleMoves(myState);
+    validMoves = getAllPossibleMoves(myState);
   }
-  return moves;
+  cout << "Number of valid moves: " << validMoves.size() << endl;
+  for (int i = 0; i < validMoves.size(); i++) {
+    cout << validMoves[i] << endl;
+  }
+  return validMoves;
 }
 
 vector<string> getAllPossibleMoves(GameState &myState) {
-  vector<string> moves;
+  vector<string> possibleMoves;
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
       if (myState.getColorOfPiece(i, j) == myState.colorToMove) {
         if (myState.getPieceAtSquare(i, j) == 'p') {
-          getPawnMoves(myState, i, j, moves);
-        } else if (myState.getPieceAtSquare(i, j) == 'r') {
-          getRookMoves(myState, i, j, moves);
-        } else if (myState.getPieceAtSquare(i, j) == 'b') {
-          getBishopMoves(myState, i, j, moves);
-        } else if (myState.getPieceAtSquare(i, j) == 'n') {
-          getKnightMoves(myState, i, j, moves);
-        } else if (myState.getPieceAtSquare(i, j) == 'q') {
-          getQueenMoves(myState, i, j, moves);
-        } else if (myState.getPieceAtSquare(i, j) == 'k') {
-          getKingMoves(myState, i, j, moves);
+          getPawnMoves(myState, i, j, possibleMoves);
+        }
+        // } else if (myState.getPieceAtSquare(i, j) == 'r') {
+        //   getRookMoves(myState, i, j, possibleMoves);
+        // } else if (myState.getPieceAtSquare(i, j) == 'b') {
+        //   getBishopMoves(myState, i, j, possibleMoves);
+        // } else if (myState.getPieceAtSquare(i, j) == 'n') {
+        //   getKnightMoves(myState, i, j, possibleMoves);
+        // } else if (myState.getPieceAtSquare(i, j) == 'q') {
+        //   getQueenMoves(myState, i, j, possibleMoves);
+        else if (myState.getPieceAtSquare(i, j) == 'k') {
+          getKingMoves(myState, i, j, possibleMoves);
         }
       }
     }
   }
-  // cout << "Number of moves: " << moves.size() << endl;
-  // for (int i = 0; i < moves.size(); i++) {
-  //   cout << moves[i] << endl;
+  // cout << "Number of moves: " << possibleMoves.size() << endl;
+  // for (int i = 0; i < possibleMoves.size(); i++) {
+  //   cout << possibleMoves[i] << endl;
   // }
-  return moves;
+  return possibleMoves;
 }
 
 void handleMove(GameState &myState, string move) {
   string startSq = move.substr(0, 2);
   string endSq = move.substr(2, 2);
+  vector<int> coords = getBoardCoordsFromMove(move);
+  int startRow = coords[0];
+  int startCol = coords[1];
+  int endRow = coords[2];
+  int endCol = coords[3];
 
   // UPDATE KING POSITION
-  if (myState.getPieceAtSquare(startSq[0] - '0', startSq[1] - '0') == 'k') {
+  if (myState.getPieceAtSquare(startRow, startCol) == 'k') {
     if (myState.colorToMove == 0) {
-      myState.whiteKingLocation[0] = endSq[0] - '0';
-      myState.whiteKingLocation[1] = endSq[1] - '0';
+      myState.whiteKingLocation[0] = endRow;
+      myState.whiteKingLocation[1] = endCol;
     } else {
-      myState.blackKingLocation[0] = endSq[0] - '0';
-      myState.blackKingLocation[1] = endSq[1] - '0';
+      myState.blackKingLocation[0] = endRow;
+      myState.blackKingLocation[1] = endCol;
     }
   }
 
-  // PAWN PROMOTION
   if (myState.getPieceAtSquare(startSq[0] - '0', startSq[1] - '0') == 'p') {
+    // PAWN PROMOTION
     if (myState.colorToMove == 0 && endSq[1] == '8') {
       myState.board[endSq[0] - '0'][endSq[1] - '0'] = 'Q';
     } else if (myState.colorToMove == 1 && endSq[1] == '1') {
       myState.board[endSq[0] - '0'][endSq[1] - '0'] = 'q';
     }
+
+    // EN PASSANT
+    // START COL != END COL
   }
 
   myState.moves.push_back(move);
@@ -145,45 +165,66 @@ void handleMove(GameState &myState, string move) {
 }
 
 void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
+  bool piecePinned = false;
+  vector<int> pinDirection = {};
+  for (int i = myState.pins.size() - 1; i >= 0; i--) {
+    if (myState.pins[i][0] == row && myState.pins[i][1] == col) {
+      piecePinned = true;
+      pinDirection = {myState.pins[i][2], myState.pins[i][3]};
+      myState.pins.erase(myState.pins.begin() + i);
+      break;
+    }
+  }
   // WHITE PAWN MOVES
-
   // MOVE FORWARD + MOVE FORWARD TWICE
   if (myState.colorToMove == 0) {
     if (myState.board[row - 1][col] == '-') {
-      moves.push_back(getMoveString(row, col, row - 1, col));
-      if (row == 6 && myState.board[row - 2][col] == '-') {
-        moves.push_back(getMoveString(row, col, row - 2, col));
+      if (!piecePinned || (pinDirection[0] == -1 && pinDirection[1] == 0)) {
+        moves.push_back(getMoveString(row, col, row - 1, col));
+        if (row == 6 && myState.board[row - 2][col] == '-') {
+          moves.push_back(getMoveString(row, col, row - 2, col));
+        }
       }
     }
     // CAPTURES
     if (col - 1 >= 0) {
       if (myState.getColorOfPiece(row - 1, col - 1) == 1) {
-        moves.push_back(getMoveString(row, col, row - 1, col - 1));
+        if (!piecePinned || (pinDirection[0] == -1 && pinDirection[1] == -1)) {
+          moves.push_back(getMoveString(row, col, row - 1, col - 1));
+        }
       }
     }
     if (col + 1 < 8) {
       if (myState.getColorOfPiece(row - 1, col + 1) == 1) {
-        moves.push_back(getMoveString(row, col, row - 1, col + 1));
+        if (!piecePinned || (pinDirection[0] == -1 && pinDirection[1] == 1)) {
+          moves.push_back(getMoveString(row, col, row - 1, col + 1));
+        }
       }
     }
   } else {
     // BLACK PAWN MOVES
     // MOVE FORWARD + MOVE FORWARD TWICE
     if (myState.board[row + 1][col] == '-') {
-      moves.push_back(getMoveString(row, col, row + 1, col));
-      if (row == 1 && myState.board[row + 2][col] == '-') {
-        moves.push_back(getMoveString(row, col, row + 2, col));
+      if (!piecePinned || (pinDirection[0] == 1 && pinDirection[1] == 0)) {
+        moves.push_back(getMoveString(row, col, row + 1, col));
+        if (row == 1 && myState.board[row + 2][col] == '-') {
+          moves.push_back(getMoveString(row, col, row + 2, col));
+        }
       }
     }
     // CAPTURES
     if (col - 1 >= 0) {
-      if (myState.getColorOfPiece(row + 1, col - 1) == 1) {
-        moves.push_back(getMoveString(row, col, row + 1, col - 1));
+      if (myState.getColorOfPiece(row + 1, col - 1) == 0) {
+        if (!piecePinned || (pinDirection[0] == 1 && pinDirection[1] == -1)) {
+          moves.push_back(getMoveString(row, col, row + 1, col - 1));
+        }
       }
     }
     if (col + 1 < 8) {
-      if (myState.getColorOfPiece(row + 1, col + 1) == 1) {
-        moves.push_back(getMoveString(row, col, row + 1, col + 1));
+      if (myState.getColorOfPiece(row + 1, col + 1) == 0) {
+        if (!piecePinned || (pinDirection[0] == 1 && pinDirection[1] == 1)) {
+          moves.push_back(getMoveString(row, col, row + 1, col + 1));
+        }
       }
     }
   }
@@ -229,7 +270,7 @@ void getBishopMoves(GameState &myState, int row, int col,
       if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
         if (myState.getPieceAtSquare(endRow, endCol) == '-') {
           // MOVEMENT
-          cout << "endRow: " << endRow << " endCol: " << endCol << endl;
+          // cout << "endRow: " << endRow << " endCol: " << endCol << endl;
           validMoves.push_back(getMoveString(row, col, endRow, endCol));
         } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
           // CAPTURES
@@ -286,17 +327,27 @@ void getKingMoves(GameState &myState, int row, int col,
         } else {
           myState.blackKingLocation = {endRow, endCol};
         }
+        checkForPinsAndChecks(myState);
+        if (myState.inCheck == false) {
+          validMoves.push_back(getMoveString(row, col, endRow, endCol));
+        }
         validMoves.push_back(getMoveString(row, col, endRow, endCol));
+        if (allyColor == 0) {
+          myState.whiteKingLocation = {row, col};
+        } else {
+          myState.blackKingLocation = {row, col};
+        }
       }
     }
   }
 }
 
 void checkForPinsAndChecks(GameState &myState) {
+  vector<vector<int>> pins = {};
+  vector<vector<int>> checks = {};
   bool inCheck = false;
-  vector<string> pins = myState.pins;
-  vector<string> checks = myState.checks;
   int enemyColor, allyColor, startRow, startCol;
+
   if (myState.colorToMove == 0) {
     enemyColor = 1;
     allyColor = 0;
@@ -308,45 +359,41 @@ void checkForPinsAndChecks(GameState &myState) {
     startRow = myState.blackKingLocation[0];
     startCol = myState.blackKingLocation[1];
   }
+
   vector<vector<int>> directions = {{-1, 0},  {1, 0},  {0, -1}, {0, 1},
                                     {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
   for (int i = 0; i < directions.size(); i++) {
     vector<int> direction = directions[i];
-    vector<int> possiblePin = {-1, -1};
+    vector<int> possiblePin = {-1, -1, -1, -1};
     for (int j = 1; j < 8; j++) {
       int endRow = startRow + direction[0] * j;
       int endCol = startCol + direction[1] * j;
       if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
-        if (myState.getPieceAtSquare(endRow, endCol) != '-') {
-          if (myState.getColorOfPiece(endRow, endCol) == allyColor &&
-              myState.getPieceAtSquare(endRow, endCol) != 'k') {
+        char endPiece = myState.getPieceAtSquare(endRow, endCol);
+        if (endPiece == allyColor && endPiece != 'k') {
+          if (possiblePin[0] == -1) {
+            possiblePin = {endRow, endCol, direction[0], direction[1]};
+          } else {
+            break;
+          }
+        } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
+          if ((0 <= i && i <= 3 && tolower(endPiece) == 'r') ||
+              (4 <= i && i <= 7 && tolower(endPiece) == 'b') ||
+              (j == 1 && tolower(endPiece) == 'p' &&
+               ((enemyColor == 0 && (i == 6 || i == 7)) ||
+                (enemyColor == 1 && (i == 4 || i == 5)))) ||
+              (tolower(endPiece) == 'q')) {
             if (possiblePin[0] == -1) {
-              possiblePin = {endRow, endCol};
+              inCheck = true;
+              checks.push_back({endRow, endCol, direction[0], direction[1]});
+              break;
             } else {
+              pins.push_back(possiblePin);
               break;
             }
-          } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
-            char piece = myState.getPieceAtSquare(endRow, endCol);
-            if ((0 <= i && i <= 3 && piece == 'r') ||
-                (4 <= i && i <= 7 && piece == 'b') ||
-                (j == 1 && piece == 'p' &&
-                 ((enemyColor == 0 && (i == 6 || i == 7)) ||
-                  (enemyColor == 1 && (i == 4 || i == 5)))) ||
-                (piece == 'q') || (j == 1 && piece == 'k')) {
-              if (possiblePin[0] == -1) {
-                inCheck = true;
-                checks.push_back(
-                    getMoveString(endRow, endCol, startRow, startCol));
-                break;
-              } else {
-                pins.push_back(getMoveString(possiblePin[0], possiblePin[1],
-                                             startRow, startCol));
-                break;
-              }
-            } else {
-              break;
-            }
+          } else {
+            break;
           }
         }
       } else {
@@ -354,21 +401,27 @@ void checkForPinsAndChecks(GameState &myState) {
       }
     }
   }
+
   vector<vector<int>> knightMoves = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
                                      {1, -2},  {1, 2},  {2, -1},  {2, 1}};
 
   for (int i = 0; i < knightMoves.size(); i++) {
-    int endRow = startRow + knightMoves[i][0];
-    int endCol = startCol + knightMoves[i][1];
+    vector<int> knightMove = knightMoves[i];
+    int endRow = startRow + knightMove[0];
+    int endCol = startCol + knightMove[1];
     if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
+      char endPiece = myState.getPieceAtSquare(endRow, endCol);
       if (myState.getColorOfPiece(endRow, endCol) == enemyColor &&
-          myState.getPieceAtSquare(endRow, endCol) == 'n') {
+          tolower(endPiece) == 'n') {
         inCheck = true;
-        checks.push_back(getMoveString(endRow, endCol, startRow, startCol));
+        cout << "Knight check" << endl;
+        checks.push_back({endRow, endCol, knightMove[0], knightMove[1]});
       }
     }
   }
 
+  myState.pins = pins;
+  myState.checks = checks;
   myState.inCheck = inCheck;
 }
 
