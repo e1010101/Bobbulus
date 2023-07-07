@@ -331,7 +331,6 @@ void getKingMoves(GameState &myState, int row, int col,
         if (myState.inCheck == false) {
           validMoves.push_back(getMoveString(row, col, endRow, endCol));
         }
-        validMoves.push_back(getMoveString(row, col, endRow, endCol));
         if (allyColor == 0) {
           myState.whiteKingLocation = {row, col};
         } else {
