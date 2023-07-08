@@ -69,11 +69,11 @@ vector<string> getValidMoves(GameState &myState) {
         // IF THE PIECE THAT MOVED IS NOT THE KING
         vector<int> coords = getBoardCoordsFromMove(possibleMoves[i]);
         if (coords[0] != kingCol && coords[1] != kingCol) {
-          cout << possibleMoves[i] << endl;
-          cout << coords[0] << " " << coords[1] << endl;
           int moveEndRow = coords[2];
           int moveEndCol = coords[3];
-          cout << moveEndRow << " " << moveEndCol << endl;
+          // cout << possibleMoves[i] << endl;
+          // cout << coords[0] << " " << coords[1] << endl;
+          // cout << moveEndRow << " " << moveEndCol << endl;
           bool validEndSquare = false;
           for (int j = 0; j < validSquares.size(); j++) {
             if (moveEndRow == validSquares[j][0] &&
@@ -86,9 +86,6 @@ vector<string> getValidMoves(GameState &myState) {
           if (!validEndSquare) {
             possibleMoves.erase(possibleMoves.begin() + i);
           }
-        } else {
-          cout << "KING MOVE" << endl;
-          cout << possibleMoves[i] << endl;
         }
       }
       validMoves = possibleMoves;
@@ -112,16 +109,15 @@ vector<string> getAllPossibleMoves(GameState &myState) {
       if (myState.getColorOfPiece(i, j) == myState.colorToMove) {
         if (myState.getPieceAtSquare(i, j) == 'p') {
           getPawnMoves(myState, i, j, possibleMoves);
-        }
-        // } else if (myState.getPieceAtSquare(i, j) == 'r') {
-        //   getRookMoves(myState, i, j, possibleMoves);
-        // } else if (myState.getPieceAtSquare(i, j) == 'b') {
-        //   getBishopMoves(myState, i, j, possibleMoves);
-        // } else if (myState.getPieceAtSquare(i, j) == 'n') {
-        //   getKnightMoves(myState, i, j, possibleMoves);
-        // } else if (myState.getPieceAtSquare(i, j) == 'q') {
-        //   getQueenMoves(myState, i, j, possibleMoves);
-        else if (myState.getPieceAtSquare(i, j) == 'k') {
+        } else if (myState.getPieceAtSquare(i, j) == 'r') {
+          getRookMoves(myState, i, j, possibleMoves);
+        } else if (myState.getPieceAtSquare(i, j) == 'b') {
+          getBishopMoves(myState, i, j, possibleMoves);
+        } else if (myState.getPieceAtSquare(i, j) == 'n') {
+          getKnightMoves(myState, i, j, possibleMoves);
+        } else if (myState.getPieceAtSquare(i, j) == 'q') {
+          getQueenMoves(myState, i, j, possibleMoves);
+        } else if (myState.getPieceAtSquare(i, j) == 'k') {
           getKingMoves(myState, i, j, possibleMoves);
         }
       }
@@ -154,12 +150,12 @@ void handleMove(GameState &myState, string move) {
     }
   }
 
-  if (myState.getPieceAtSquare(startSq[0] - '0', startSq[1] - '0') == 'p') {
+  if (myState.getPieceAtSquare(startRow, startCol) == 'p') {
     // PAWN PROMOTION
-    if (myState.colorToMove == 0 && endSq[1] == '8') {
-      myState.board[endSq[0] - '0'][endSq[1] - '0'] = 'Q';
-    } else if (myState.colorToMove == 1 && endSq[1] == '1') {
-      myState.board[endSq[0] - '0'][endSq[1] - '0'] = 'q';
+    if (myState.colorToMove == 0 && endRow == 7) {
+      myState.board[endRow][endCol] = 'Q';
+    } else if (myState.colorToMove == 1 && endRow == 0) {
+      myState.board[endRow][endCol] = 'q';
     }
 
     // EN PASSANT
@@ -239,6 +235,17 @@ void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
 
 void getRookMoves(GameState &myState, int row, int col,
                   vector<string> &validMoves) {
+  bool piecePinned = false;
+  vector<int> pinDirection = {};
+  for (int i = myState.pins.size() - 1; i >= 0; i--) {
+    if (myState.pins[i][0] == row && myState.pins[i][1] == col) {
+      piecePinned = true;
+      pinDirection = {myState.pins[i][2], myState.pins[i][3]};
+      myState.pins.erase(myState.pins.begin() + i);
+      break;
+    }
+  }
+
   vector<vector<int>> directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
   int enemyColor = 1 - myState.colorToMove;
   for (int d = 0; d < directions.size(); d++) {
@@ -247,16 +254,20 @@ void getRookMoves(GameState &myState, int row, int col,
       int endCol = col + directions[d][1] * i;
 
       if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
-        if (myState.getPieceAtSquare(endRow, endCol) == '-') {
-          // MOVEMENT
-          validMoves.push_back(getMoveString(row, col, endRow, endCol));
-        } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
-          // CAPTURES
-          // cout << "endRow: " << endRow << " endCol: " << endCol << endl;
-          validMoves.push_back(getMoveString(row, col, endRow, endCol));
-          break;
-        } else {
-          break;
+        if (!piecePinned || pinDirection == directions[d] ||
+            (pinDirection[0] == -directions[d][0] &&
+             pinDirection[1] == -directions[d][1])) {
+          if (myState.getPieceAtSquare(endRow, endCol) == '-') {
+            // MOVEMENT
+            validMoves.push_back(getMoveString(row, col, endRow, endCol));
+          } else if (myState.getColorOfPiece(endRow, endCol) == enemyColor) {
+            // CAPTURES
+            // cout << "endRow: " << endRow << " endCol: " << endCol << endl;
+            validMoves.push_back(getMoveString(row, col, endRow, endCol));
+            break;
+          } else {
+            break;
+          }
         }
       } else {
         break;
@@ -267,6 +278,19 @@ void getRookMoves(GameState &myState, int row, int col,
 
 void getBishopMoves(GameState &myState, int row, int col,
                     vector<string> &validMoves) {
+  bool piecePinned = false;
+  vector<int> pinDirection = {};
+  for (int i = myState.pins.size() - 1; i >= 0; i--) {
+    if (myState.pins[i][0] == row && myState.pins[i][1] == col) {
+      piecePinned = true;
+      pinDirection = {myState.pins[i][2], myState.pins[i][3]};
+      if (myState.getPieceAtSquare(row, col) != 'Q') {
+        myState.pins.erase(myState.pins.begin() + i);
+      }
+      break;
+    }
+  }
+
   vector<vector<int>> directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
   int enemyColor = 1 - myState.colorToMove;
   for (int d = 0; d < directions.size(); d++) {
@@ -296,6 +320,15 @@ void getBishopMoves(GameState &myState, int row, int col,
 
 void getKnightMoves(GameState &myState, int row, int col,
                     vector<string> &validMoves) {
+  bool piecePinned = false;
+  for (int i = myState.pins.size() - 1; i >= 0; i--) {
+    if (myState.pins[i][0] == row && myState.pins[i][1] == col) {
+      piecePinned = true;
+      myState.pins.erase(myState.pins.begin() + i);
+      break;
+    }
+  }
+
   vector<vector<int>> directions = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
                                     {1, -2},  {1, 2},  {2, -1},  {2, 1}};
   int enemyColor = 1 - myState.colorToMove;
