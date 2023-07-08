@@ -44,6 +44,7 @@ vector<string> getValidMoves(GameState &myState) {
   if (myState.inCheck) {
     if (myState.checks.size() == 1) {
       vector<string> possibleMoves = getAllPossibleMoves(myState);
+      cout << "Number of possible moves: " << possibleMoves.size() << endl;
       vector<int> check = myState.checks[0];
       cout << "Check: " << check[0] << " " << check[1] << " " << check[2] << " "
            << check[3] << endl;
@@ -66,10 +67,13 @@ vector<string> getValidMoves(GameState &myState) {
 
       for (int i = possibleMoves.size() - 1; i >= 0; i--) {
         // IF THE PIECE THAT MOVED IS NOT THE KING
-        if (myState.getPieceAtSquare(possibleMoves[i][0] - 'a',
-                                     possibleMoves[i][1] - '1') != 'k') {
-          int moveEndRow = possibleMoves[i][2] - 'a';
-          int moveEndCol = possibleMoves[i][3] - '1';
+        vector<int> coords = getBoardCoordsFromMove(possibleMoves[i]);
+        if (coords[0] != kingCol && coords[1] != kingCol) {
+          cout << possibleMoves[i] << endl;
+          cout << coords[0] << " " << coords[1] << endl;
+          int moveEndRow = coords[2];
+          int moveEndCol = coords[3];
+          cout << moveEndRow << " " << moveEndCol << endl;
           bool validEndSquare = false;
           for (int j = 0; j < validSquares.size(); j++) {
             if (moveEndRow == validSquares[j][0] &&
@@ -82,6 +86,9 @@ vector<string> getValidMoves(GameState &myState) {
           if (!validEndSquare) {
             possibleMoves.erase(possibleMoves.begin() + i);
           }
+        } else {
+          cout << "KING MOVE" << endl;
+          cout << possibleMoves[i] << endl;
         }
       }
       validMoves = possibleMoves;
@@ -327,6 +334,7 @@ void getKingMoves(GameState &myState, int row, int col,
         } else {
           myState.blackKingLocation = {endRow, endCol};
         }
+        cout << "king checking" << endl;
         checkForPinsAndChecks(myState);
         if (myState.inCheck == false) {
           validMoves.push_back(getMoveString(row, col, endRow, endCol));
@@ -417,6 +425,10 @@ void checkForPinsAndChecks(GameState &myState) {
         checks.push_back({endRow, endCol, knightMove[0], knightMove[1]});
       }
     }
+  }
+
+  if (!inCheck) {
+    cout << "Not in check" << endl;
   }
 
   myState.pins = pins;
