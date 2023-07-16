@@ -21,6 +21,7 @@ public:
   vector<vector<int>> pins;
   vector<vector<int>> checks;
   bool inCheck;
+  vector<int> enPassantSquare = {-1000, -1000};
 
   GameState();
 

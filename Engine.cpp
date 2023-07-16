@@ -16,7 +16,7 @@ string makeMove(GameState &myState) {
   }
 
   vector<string> validMoves = getValidMoves(myState);
-  // cout << "Number of valid moves: " << validMoves.size() << endl;
+  cout << "Number of valid moves: " << validMoves.size() << endl;
   if (validMoves.size() > 0) {
     myState.colorToMove = 1 - myState.colorToMove;
     string moveToMake = validMoves[0];
@@ -71,9 +71,6 @@ vector<string> getValidMoves(GameState &myState) {
         if (coords[0] != kingCol && coords[1] != kingCol) {
           int moveEndRow = coords[2];
           int moveEndCol = coords[3];
-          // cout << possibleMoves[i] << endl;
-          // cout << coords[0] << " " << coords[1] << endl;
-          // cout << moveEndRow << " " << moveEndCol << endl;
           bool validEndSquare = false;
           for (int j = 0; j < validSquares.size(); j++) {
             if (moveEndRow == validSquares[j][0] &&
@@ -95,10 +92,6 @@ vector<string> getValidMoves(GameState &myState) {
   } else {
     validMoves = getAllPossibleMoves(myState);
   }
-  cout << "Number of valid moves: " << validMoves.size() << endl;
-  for (int i = 0; i < validMoves.size(); i++) {
-    cout << validMoves[i] << endl;
-  }
   return validMoves;
 }
 
@@ -108,7 +101,9 @@ vector<string> getAllPossibleMoves(GameState &myState) {
     for (int j = 0; j < 8; j++) {
       if (myState.getColorOfPiece(i, j) == myState.colorToMove) {
         if (myState.getPieceAtSquare(i, j) == 'p') {
+          cout << "Getting pawn moves" << endl;
           getPawnMoves(myState, i, j, possibleMoves);
+          cout << "Number of pawn moves: " << possibleMoves.size() << endl;
         } else if (myState.getPieceAtSquare(i, j) == 'r') {
           getRookMoves(myState, i, j, possibleMoves);
         } else if (myState.getPieceAtSquare(i, j) == 'b') {
@@ -123,10 +118,6 @@ vector<string> getAllPossibleMoves(GameState &myState) {
       }
     }
   }
-  // cout << "Number of moves: " << possibleMoves.size() << endl;
-  // for (int i = 0; i < possibleMoves.size(); i++) {
-  //   cout << possibleMoves[i] << endl;
-  // }
   return possibleMoves;
 }
 
@@ -159,7 +150,17 @@ void handleMove(GameState &myState, string move) {
     }
 
     // EN PASSANT
-    // START COL != END COL
+    if (myState.enPassantSquare[0] == endRow &&
+        myState.enPassantSquare[1] == endCol) {
+      myState.board[startRow][endCol] = '-';
+    }
+
+    // RESET OR SET EN PASSANT
+    if (abs(startRow - endRow) == 2) {
+      myState.enPassantSquare = {(startRow + endRow) / 2, startCol};
+    } else {
+      myState.enPassantSquare = {-1, -1};
+    }
   }
 
   myState.moves.push_back(move);
@@ -195,6 +196,9 @@ void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
         if (!piecePinned || (pinDirection[0] == -1 && pinDirection[1] == -1)) {
           moves.push_back(getMoveString(row, col, row - 1, col - 1));
         }
+      } else if (myState.enPassantSquare[0] == row - 1 &&
+                 myState.enPassantSquare[1] == col - 1) {
+        moves.push_back(getMoveString(row, col, row - 1, col - 1));
       }
     }
     if (col + 1 < 8) {
@@ -202,6 +206,9 @@ void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
         if (!piecePinned || (pinDirection[0] == -1 && pinDirection[1] == 1)) {
           moves.push_back(getMoveString(row, col, row - 1, col + 1));
         }
+      } else if (myState.enPassantSquare[0] == row - 1 &&
+                 myState.enPassantSquare[1] == col + 1) {
+        moves.push_back(getMoveString(row, col, row - 1, col + 1));
       }
     }
   } else {
@@ -221,6 +228,9 @@ void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
         if (!piecePinned || (pinDirection[0] == 1 && pinDirection[1] == -1)) {
           moves.push_back(getMoveString(row, col, row + 1, col - 1));
         }
+      } else if (myState.enPassantSquare[0] == row + 1 &&
+                 myState.enPassantSquare[1] == col - 1) {
+        moves.push_back(getMoveString(row, col, row + 1, col - 1));
       }
     }
     if (col + 1 < 8) {
@@ -228,6 +238,9 @@ void getPawnMoves(GameState &myState, int row, int col, vector<string> &moves) {
         if (!piecePinned || (pinDirection[0] == 1 && pinDirection[1] == 1)) {
           moves.push_back(getMoveString(row, col, row + 1, col + 1));
         }
+      } else if (myState.enPassantSquare[0] == row + 1 &&
+                 myState.enPassantSquare[1] == col + 1) {
+        moves.push_back(getMoveString(row, col, row + 1, col + 1));
       }
     }
   }
@@ -458,10 +471,6 @@ void checkForPinsAndChecks(GameState &myState) {
         checks.push_back({endRow, endCol, knightMove[0], knightMove[1]});
       }
     }
-  }
-
-  if (!inCheck) {
-    cout << "Not in check" << endl;
   }
 
   myState.pins = pins;
