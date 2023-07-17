@@ -17,6 +17,9 @@ string makeMove(GameState &myState) {
 
   vector<string> validMoves = getValidMoves(myState);
   cout << "Number of valid moves: " << validMoves.size() << endl;
+  for (int i = 0; i < validMoves.size(); i++) {
+    cout << validMoves[i] << endl;
+  }
   if (validMoves.size() > 0) {
     myState.colorToMove = 1 - myState.colorToMove;
     string moveToMake = validMoves[0];
@@ -44,7 +47,6 @@ vector<string> getValidMoves(GameState &myState) {
   if (myState.inCheck) {
     if (myState.checks.size() == 1) {
       vector<string> possibleMoves = getAllPossibleMoves(myState);
-      cout << "Number of possible moves: " << possibleMoves.size() << endl;
       vector<int> check = myState.checks[0];
       cout << "Check: " << check[0] << " " << check[1] << " " << check[2] << " "
            << check[3] << endl;
@@ -65,27 +67,29 @@ vector<string> getValidMoves(GameState &myState) {
         }
       }
 
-      for (int i = possibleMoves.size() - 1; i >= 0; i--) {
+      cout << "possibleMoves: " << possibleMoves.size() << endl;
+      for (int i = 0; i < possibleMoves.size(); i++) {
         // IF THE PIECE THAT MOVED IS NOT THE KING
         vector<int> coords = getBoardCoordsFromMove(possibleMoves[i]);
-        if (coords[0] != kingCol && coords[1] != kingCol) {
-          int moveEndRow = coords[2];
-          int moveEndCol = coords[3];
-          bool validEndSquare = false;
+        cout << "coords: " << coords[0] << " " << coords[1] << " " << coords[2]
+             << " " << coords[3] << endl;
+        if (coords[1] != kingRow || coords[0] != kingCol) {
+          int moveEndRow = coords[3];
+          int moveEndCol = coords[2];
+          cout << moveEndRow << " " << moveEndCol << endl;
+          cout << validSquares[0][0] << " " << validSquares[0][1] << endl;
           for (int j = 0; j < validSquares.size(); j++) {
             if (moveEndRow == validSquares[j][0] &&
                 moveEndCol == validSquares[j][1]) {
-              validEndSquare = true;
+              cout << moveEndRow << " " << moveEndCol << endl;
+              cout << validSquares[j][0] << " " << validSquares[j][1] << endl;
+              validMoves.push_back(possibleMoves[i]);
+              cout << "Pushed back: " << possibleMoves[i] << endl;
               break;
             }
           }
-
-          if (!validEndSquare) {
-            possibleMoves.erase(possibleMoves.begin() + i);
-          }
         }
       }
-      validMoves = possibleMoves;
     } else {
       getKingMoves(myState, kingRow, kingCol, myState.moves);
     }
@@ -101,9 +105,7 @@ vector<string> getAllPossibleMoves(GameState &myState) {
     for (int j = 0; j < 8; j++) {
       if (myState.getColorOfPiece(i, j) == myState.colorToMove) {
         if (myState.getPieceAtSquare(i, j) == 'p') {
-          cout << "Getting pawn moves" << endl;
           getPawnMoves(myState, i, j, possibleMoves);
-          cout << "Number of pawn moves: " << possibleMoves.size() << endl;
         } else if (myState.getPieceAtSquare(i, j) == 'r') {
           getRookMoves(myState, i, j, possibleMoves);
         } else if (myState.getPieceAtSquare(i, j) == 'b') {
@@ -380,7 +382,6 @@ void getKingMoves(GameState &myState, int row, int col,
         } else {
           myState.blackKingLocation = {endRow, endCol};
         }
-        cout << "king checking" << endl;
         checkForPinsAndChecks(myState);
         if (myState.inCheck == false) {
           validMoves.push_back(getMoveString(row, col, endRow, endCol));
