@@ -28,6 +28,8 @@ void UciLoop() {
       parsePosition(myState, InputFromGUI);
       // string col = MyBoard.colorToMove == 0 ? "white" : "black";
       // cout << col << endl;
+    } else if (InputFromGUI == "ucinewgame") {
+      myState = GameState();
     } else if (InputFromGUI.substr(0, 4) == "quit") {
       break;
     }
