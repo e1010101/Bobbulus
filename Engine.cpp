@@ -164,8 +164,6 @@ void handleMove(GameState &myState, string move) {
     } else {
       myState.enPassantSquare = {-1, -1};
     }
-
-    // UPDATE CASTLING RIGHTS
   }
 
   myState.moves.push_back(move);
@@ -456,19 +454,20 @@ void checkForPinsAndChecks(GameState &myState) {
     startCol = myState.blackKingLocation[1];
   }
 
-  vector<vector<int>> directions = {{-1, 0},  {1, 0},  {0, -1}, {0, 1},
+  vector<vector<int>> directions = {{-1, 0},  {0, -1}, {1, 0},  {0, 1},
                                     {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
   for (int i = 0; i < directions.size(); i++) {
     vector<int> direction = directions[i];
-    vector<int> possiblePin = {-1, -1, -1, -1};
+    vector<int> possiblePin = {-1000, -1000, -1000, -1000};
     for (int j = 1; j < 8; j++) {
       int endRow = startRow + direction[0] * j;
       int endCol = startCol + direction[1] * j;
       if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
         char endPiece = myState.getPieceAtSquare(endRow, endCol);
-        if (endPiece == allyColor && endPiece != 'k') {
-          if (possiblePin[0] == -1) {
+        int endPieceColor = myState.getColorOfPiece(endRow, endCol);
+        if (endPieceColor == allyColor && endPiece != 'k') {
+          if (possiblePin[0] == -1000) {
             possiblePin = {endRow, endCol, direction[0], direction[1]};
           } else {
             break;
@@ -480,7 +479,7 @@ void checkForPinsAndChecks(GameState &myState) {
                ((enemyColor == 0 && (i == 6 || i == 7)) ||
                 (enemyColor == 1 && (i == 4 || i == 5)))) ||
               (tolower(endPiece) == 'q')) {
-            if (possiblePin[0] == -1) {
+            if (possiblePin[0] == -1000) {
               inCheck = true;
               checks.push_back({endRow, endCol, direction[0], direction[1]});
               break;
