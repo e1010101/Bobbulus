@@ -45,6 +45,4 @@ extern void getQueensideCastleMoves(GameState &myState, int row, int col,
 
 extern void checkForPinsAndChecks(GameState &myState);
 
-extern bool inCheck(GameState &myState);
-
 extern bool squareAttacked(GameState &myState, int row, int col);

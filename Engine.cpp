@@ -66,6 +66,9 @@ vector<string> getValidMoves(GameState &myState) {
           }
         }
       }
+      for (int i = 0; i < validSquares.size(); i++) {
+        cout << validSquares[i][0] << " " << validSquares[i][1] << endl;
+      }
 
       cout << "possibleMoves: " << possibleMoves.size() << endl;
       for (int i = 0; i < possibleMoves.size(); i++) {
@@ -76,18 +79,15 @@ vector<string> getValidMoves(GameState &myState) {
         if (coords[1] != kingRow || coords[0] != kingCol) {
           int moveEndRow = coords[3];
           int moveEndCol = coords[2];
-          cout << moveEndRow << " " << moveEndCol << endl;
-          cout << validSquares[0][0] << " " << validSquares[0][1] << endl;
           for (int j = 0; j < validSquares.size(); j++) {
             if (moveEndRow == validSquares[j][0] &&
                 moveEndCol == validSquares[j][1]) {
-              cout << moveEndRow << " " << moveEndCol << endl;
-              cout << validSquares[j][0] << " " << validSquares[j][1] << endl;
               validMoves.push_back(possibleMoves[i]);
-              cout << "Pushed back: " << possibleMoves[i] << endl;
               break;
             }
           }
+        } else {
+          validMoves.push_back(possibleMoves[i]);
         }
       }
     } else {
@@ -518,16 +518,6 @@ void checkForPinsAndChecks(GameState &myState) {
   myState.pins = pins;
   myState.checks = checks;
   myState.inCheck = inCheck;
-}
-
-bool inCheck(GameState &myState) {
-  if (myState.colorToMove == 0) {
-    return squareAttacked(myState, myState.whiteKingLocation[0],
-                          myState.whiteKingLocation[1]);
-  } else {
-    return squareAttacked(myState, myState.blackKingLocation[0],
-                          myState.blackKingLocation[1]);
-  }
 }
 
 bool squareAttacked(GameState &myState, int row, int col) {
