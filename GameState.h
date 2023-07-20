@@ -22,6 +22,8 @@ public:
   vector<vector<int>> checks;
   bool inCheck;
   vector<int> enPassantSquare = {-1000, -1000};
+  // CASTLE RIGHTS: WKS, WQS, BKS, BQS
+  vector<bool> castleRights = {true, true, true, true};
 
   GameState();
 
@@ -41,5 +43,7 @@ extern vector<int> getBoardCoordsFromMove(string move);
 extern string getMoveString(int rank1, int file1, int rank2, int file2);
 
 extern void parsePosition(GameState &myState, string InputFromGUI);
+
+extern void updateCastlingRights(GameState &myState, string move);
 
 #endif // BOARD_H

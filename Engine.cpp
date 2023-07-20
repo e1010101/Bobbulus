@@ -95,6 +95,7 @@ vector<string> getValidMoves(GameState &myState) {
     }
   } else {
     validMoves = getAllPossibleMoves(myState);
+    getCastleMoves(myState, kingRow, kingCol, validMoves);
   }
   return validMoves;
 }
@@ -163,6 +164,8 @@ void handleMove(GameState &myState, string move) {
     } else {
       myState.enPassantSquare = {-1, -1};
     }
+
+    // UPDATE CASTLING RIGHTS
   }
 
   myState.moves.push_back(move);
@@ -392,6 +395,45 @@ void getKingMoves(GameState &myState, int row, int col,
           myState.blackKingLocation = {row, col};
         }
       }
+    }
+  }
+}
+
+void getCastleMoves(GameState &myState, int row, int col,
+                    vector<string> &validMoves) {
+  if (squareAttacked(myState, row, col)) {
+    return;
+  }
+
+  if ((myState.colorToMove == 0 && myState.castleRights[0]) ||
+      (myState.colorToMove == 1 && myState.castleRights[2])) {
+    getKingsideCastleMoves(myState, row, col, validMoves);
+  }
+  if ((myState.colorToMove == 0 && myState.castleRights[1]) ||
+      (myState.colorToMove == 1 && myState.castleRights[3])) {
+    getQueensideCastleMoves(myState, row, col, validMoves);
+  }
+}
+
+void getKingsideCastleMoves(GameState &myState, int row, int col,
+                            vector<string> &validMoves) {
+  if (myState.getPieceAtSquare(row, col + 1) == '-' &&
+      myState.getPieceAtSquare(row, col + 2) == '-') {
+    if (!squareAttacked(myState, row, col + 1) &&
+        !squareAttacked(myState, row, col + 2)) {
+      validMoves.push_back(getMoveString(row, col, row, col + 2));
+    }
+  }
+}
+
+void getQueensideCastleMoves(GameState &myState, int row, int col,
+                             vector<string> &validMoves) {
+  if (myState.getPieceAtSquare(row, col - 1) == '-' &&
+      myState.getPieceAtSquare(row, col - 2) == '-' &&
+      myState.getPieceAtSquare(row, col - 3) == '-') {
+    if (!squareAttacked(myState, row, col - 1) &&
+        !squareAttacked(myState, row, col - 2)) {
+      validMoves.push_back(getMoveString(row, col, row, col - 2));
     }
   }
 }

@@ -34,6 +34,15 @@ extern void getQueenMoves(GameState &myState, int row, int col,
 extern void getKingMoves(GameState &myState, int row, int col,
                          vector<string> &validMoves);
 
+extern void getCastleMoves(GameState &myState, int row, int col,
+                           vector<string> &validMoves);
+
+extern void getKingsideCastleMoves(GameState &myState, int row, int col,
+                                   vector<string> &validMoves);
+
+extern void getQueensideCastleMoves(GameState &myState, int row, int col,
+                                    vector<string> &validMoves);
+
 extern void checkForPinsAndChecks(GameState &myState);
 
 extern bool inCheck(GameState &myState);

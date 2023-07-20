@@ -44,8 +44,32 @@ void GameState::updateBoard(string move) {
     int file1 = move[0] - 'a';
     int rank2 = 7 - (move[3] - '1');
     int file2 = move[2] - 'a';
+    char pieceMoved = board[rank1][file1];
+
     board[rank2][file2] = board[rank1][file1];
     board[rank1][file1] = '-';
+
+    // KING POSITION UPDATE
+    if (pieceMoved == 'K') {
+      whiteKingLocation[0] = rank2;
+      whiteKingLocation[1] = file2;
+    } else if (pieceMoved == 'k') {
+      blackKingLocation[0] = rank2;
+      blackKingLocation[1] = file2;
+    }
+
+    if (pieceMoved == 'K' || pieceMoved == 'k') {
+      if (file2 - file1 == 2) {
+        board[rank2][file2 - 1] = board[rank2][file2 + 1];
+        board[rank2][file2 + 1] = '-';
+      } else {
+        board[rank2][file2 + 1] = board[rank2][file2 - 2];
+        board[rank2][file2 - 2] = '-';
+      }
+    }
+
+    updateCastlingRights(*this, move);
+
   } else if (move.length() == 5) {
     // PAWN PROMOTION
     string piece = move.substr(4, 1);
@@ -136,5 +160,41 @@ void parsePosition(GameState &myState, string InputFromGUI) {
     }
 
     myState.colorToMove = currentTurn;
+  }
+}
+
+void updateCastlingRights(GameState &myState, string move) {
+  vector<int> coords = getBoardCoordsFromMove(move);
+  int startCol = coords[0];
+  int startRow = coords[1];
+  int endCol = coords[2];
+  int endRow = coords[3];
+
+  if (myState.getPieceAtSquare(startRow, startCol) == 'k' &&
+      myState.getColorOfPiece(startRow, startCol) == 0) {
+    myState.castleRights[0] = false;
+    myState.castleRights[1] = false;
+  } else if (myState.getPieceAtSquare(startRow, startCol) == 'k' &&
+             myState.getColorOfPiece(startRow, startCol) == 1) {
+    myState.castleRights[2] = false;
+    myState.castleRights[3] = false;
+  } else if (myState.getPieceAtSquare(startRow, startCol) == 'r' &&
+             myState.getColorOfPiece(startRow, startCol) == 0) {
+    if (startRow == 7) {
+      if (startCol == 0) {
+        myState.castleRights[1] = false;
+      } else if (startCol == 7) {
+        myState.castleRights[0] = false;
+      }
+    }
+  } else if (myState.getPieceAtSquare(startRow, startCol) == 'r' &&
+             myState.getColorOfPiece(startRow, startCol) == 1) {
+    if (startRow == 0) {
+      if (startCol == 0) {
+        myState.castleRights[3] = false;
+      } else if (startCol == 7) {
+        myState.castleRights[2] = false;
+      }
+    }
   }
 }
