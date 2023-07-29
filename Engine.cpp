@@ -47,6 +47,7 @@ vector<string> getValidMoves(GameState &myState) {
   if (myState.inCheck) {
     if (myState.checks.size() == 1) {
       vector<string> possibleMoves = getAllPossibleMoves(myState);
+      getKingMoves(myState, kingRow, kingCol, possibleMoves);
       vector<int> check = myState.checks[0];
       cout << "Check: " << check[0] << " " << check[1] << " " << check[2] << " "
            << check[3] << endl;
@@ -95,6 +96,7 @@ vector<string> getValidMoves(GameState &myState) {
     }
   } else {
     validMoves = getAllPossibleMoves(myState);
+    getKingMoves(myState, kingRow, kingCol, validMoves);
     getCastleMoves(myState, kingRow, kingCol, validMoves);
   }
   return validMoves;
@@ -107,16 +109,19 @@ vector<string> getAllPossibleMoves(GameState &myState) {
       if (myState.getColorOfPiece(i, j) == myState.colorToMove) {
         if (myState.getPieceAtSquare(i, j) == 'p') {
           getPawnMoves(myState, i, j, possibleMoves);
+          cout << "got pawn moves" << endl;
         } else if (myState.getPieceAtSquare(i, j) == 'r') {
           getRookMoves(myState, i, j, possibleMoves);
+          cout << "got rook moves" << endl;
         } else if (myState.getPieceAtSquare(i, j) == 'b') {
           getBishopMoves(myState, i, j, possibleMoves);
+          cout << "got bishop moves" << endl;
         } else if (myState.getPieceAtSquare(i, j) == 'n') {
           getKnightMoves(myState, i, j, possibleMoves);
+          cout << "got knight moves" << endl;
         } else if (myState.getPieceAtSquare(i, j) == 'q') {
           getQueenMoves(myState, i, j, possibleMoves);
-        } else if (myState.getPieceAtSquare(i, j) == 'k') {
-          getKingMoves(myState, i, j, possibleMoves);
+          cout << "got queen moves" << endl;
         }
       }
     }
@@ -376,23 +381,10 @@ void getKingMoves(GameState &myState, int row, int col,
     int endRow = row + rowMoves[i];
     int endCol = col + colMoves[i];
     if ((0 <= endRow && endRow < 8) && (0 <= endCol && endCol < 8)) {
-      int endPiece = myState.getColorOfPiece(endRow, endCol);
-      if (endPiece != allyColor) {
-        if (allyColor == 0) {
-          myState.whiteKingLocation = {endRow, endCol};
-        } else {
-          myState.blackKingLocation = {endRow, endCol};
-        }
-        checkForPinsAndChecks(myState);
-        if (myState.inCheck == false) {
-          validMoves.push_back(getMoveString(row, col, endRow, endCol));
-        }
-        if (allyColor == 0) {
-          myState.whiteKingLocation = {row, col};
-        } else {
-          myState.blackKingLocation = {row, col};
-        }
+      if (squareAttacked(myState, endRow, endCol)) {
+        continue;
       }
+      validMoves.push_back(getMoveString(row, col, endRow, endCol));
     }
   }
 }
@@ -481,6 +473,9 @@ void checkForPinsAndChecks(GameState &myState) {
               (tolower(endPiece) == 'q')) {
             if (possiblePin[0] == -1000) {
               inCheck = true;
+              cout << endPiece << " check" << endl;
+              cout << endRow << " " << endCol << " " << direction[0] << " "
+                   << direction[1] << endl;
               checks.push_back({endRow, endCol, direction[0], direction[1]});
               break;
             } else {
