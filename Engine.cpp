@@ -384,7 +384,9 @@ void getKingMoves(GameState &myState, int row, int col,
       if (squareAttacked(myState, endRow, endCol)) {
         continue;
       }
-      validMoves.push_back(getMoveString(row, col, endRow, endCol));
+      if (myState.getColorOfPiece(endRow, endCol) != allyColor) {
+        validMoves.push_back(getMoveString(row, col, endRow, endCol));
+      }
     }
   }
 }
