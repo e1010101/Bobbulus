@@ -163,6 +163,89 @@ void parsePosition(GameState &myState, string InputFromGUI) {
   }
 }
 
+void parseFen(GameState &myState, string InputFromGUI) {
+  string fen = InputFromGUI.substr(12, InputFromGUI.length() - 12);
+  string moves = "";
+  for (int i = 0; i < fen.length(); i++) {
+    if (fen[i] == 'm' && fen[i + 1] == 'o' && fen[i + 2] == 'v' &&
+        fen[i + 3] == 'e' && fen[i + 4] == 's') {
+      moves = fen.substr(i + 6, fen.length() - i - 6);
+      fen = fen.substr(0, i - 1);
+      break;
+    }
+  }
+
+  for (int i = 0; i < 8; i++) {
+    int file = 0;
+    for (int j = 0; j < fen.length(); j++) {
+      if (fen[j] == '/') {
+        break;
+      } else if (fen[j] >= '1' and fen[j] <= '8') {
+        int numSpaces = fen[j] - '0';
+        for (int k = 0; k < numSpaces; k++) {
+          myState.board[i][file] = '-';
+          file++;
+        }
+      } else if (fen[j] != ' ') {
+        myState.board[i][file] = fen[j];
+        file++;
+      }
+    }
+    fen = fen.substr(fen.find('/') + 1, fen.length() - fen.find('/'));
+  }
+
+  if (fen[0] == 'w') {
+    myState.colorToMove = 0;
+  } else {
+    myState.colorToMove = 1;
+  }
+
+  if (fen[2] == 'K') {
+    myState.castleRights[0] = true;
+  } else {
+    myState.castleRights[0] = false;
+  }
+
+  if (fen[3] == 'Q') {
+    myState.castleRights[1] = true;
+  } else {
+    myState.castleRights[1] = false;
+  }
+
+  if (fen[4] == 'k') {
+    myState.castleRights[2] = true;
+  } else {
+    myState.castleRights[2] = false;
+  }
+
+  if (fen[5] == 'q') {
+    myState.castleRights[3] = true;
+  } else {
+    myState.castleRights[3] = false;
+  }
+
+  if (moves != "") {
+    vector<string> movesVector;
+    stringstream ss(moves);
+    string token;
+    int currentTurn = myState.colorToMove;
+    int numMovesMave = myState.moves.size();
+    int movesCounter = 0;
+
+    while (ss >> token) {
+      cout << token << endl;
+      myState.colorToMove = currentTurn == 0 ? 1 : 0;
+      if (movesCounter < numMovesMave) {
+        movesCounter++;
+        continue;
+      }
+      myState.updateBoard(token);
+      myState.moves.push_back(token);
+    }
+  }
+  cout << myState.colorToMove << endl;
+}
+
 void updateCastlingRights(GameState &myState, string move) {
   vector<int> coords = getBoardCoordsFromMove(move);
   int startCol = coords[0];

@@ -24,12 +24,14 @@ void UciLoop() {
       cout << "uciok" << endl;
     } else if (InputFromGUI.substr(0, 2) == "go") {
       cout << "bestmove " + makeMove(myState) << endl;
+    } else if (InputFromGUI == "ucinewgame") {
+      myState = GameState();
+    } else if (InputFromGUI.substr(0, 12) == "position fen") {
+      parseFen(myState, InputFromGUI);
     } else if (InputFromGUI.substr(0, 8) == "position") {
       parsePosition(myState, InputFromGUI);
       // string col = MyBoard.colorToMove == 0 ? "white" : "black";
       // cout << col << endl;
-    } else if (InputFromGUI == "ucinewgame") {
-      myState = GameState();
     } else if (InputFromGUI.substr(0, 4) == "quit") {
       break;
     }
