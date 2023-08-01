@@ -44,31 +44,28 @@ void GameState::updateBoard(string move) {
     int file1 = move[0] - 'a';
     int rank2 = 7 - (move[3] - '1');
     int file2 = move[2] - 'a';
-    char pieceMoved = board[rank1][file1];
+    char pieceMoved = getPieceAtSquare(rank1, file1);
 
-    board[rank2][file2] = board[rank1][file1];
-    board[rank1][file1] = '-';
-
-    // KING POSITION UPDATE
-    if (pieceMoved == 'K') {
-      whiteKingLocation[0] = rank2;
-      whiteKingLocation[1] = file2;
-    } else if (pieceMoved == 'k') {
-      blackKingLocation[0] = rank2;
-      blackKingLocation[1] = file2;
-    }
-
-    if (pieceMoved == 'K' || pieceMoved == 'k') {
-      if (file2 - file1 == 2) {
-        board[rank2][file2 - 1] = board[rank2][file2 + 1];
-        board[rank2][file2 + 1] = '-';
+    if (pieceMoved == 'k') {
+      if (abs(file2 - file1) == 2) {
+        board[rank1][file1] = '-';
+        if (file2 == 6) {
+          board[rank1][7] = '-';
+          board[rank1][5] = colorToMove == 1 ? 'R' : 'r';
+          board[rank1][6] = colorToMove == 1 ? 'K' : 'k';
+        } else if (file2 == 2) {
+          board[rank1][0] = '-';
+          board[rank1][3] = colorToMove == 1 ? 'R' : 'r';
+          board[rank1][2] = colorToMove == 1 ? 'K' : 'k';
+        }
       } else {
-        board[rank2][file2 + 1] = board[rank2][file2 - 2];
-        board[rank2][file2 - 2] = '-';
+        board[rank2][file2] = board[rank1][file1];
+        board[rank1][file1] = '-';
       }
+    } else {
+      board[rank2][file2] = board[rank1][file1];
+      board[rank1][file1] = '-';
     }
-
-    updateCastlingRights(*this, move);
 
   } else if (move.length() == 5) {
     // PAWN PROMOTION

@@ -22,9 +22,10 @@ string makeMove(GameState &myState) {
   }
   if (validMoves.size() > 0) {
     myState.colorToMove = 1 - myState.colorToMove;
-    string moveToMake = validMoves[0];
+    int moveChosen = rand() % validMoves.size();
+    string moveToMake = validMoves[moveChosen];
     handleMove(myState, moveToMake);
-    return validMoves[0];
+    return validMoves[moveChosen];
   }
   // e2e4
   return getMoveString(6, 4, 4, 4);
@@ -138,6 +139,12 @@ void handleMove(GameState &myState, string move) {
   int endRow = coords[2];
   int endCol = coords[3];
 
+  // UPDATE CASTLING RIGHTS
+  if (myState.getPieceAtSquare(startRow, startCol) == 'k' ||
+      myState.getPieceAtSquare(startRow, startCol) == 'r') {
+    updateCastlingRights(myState, move);
+  }
+
   // UPDATE KING POSITION
   if (myState.getPieceAtSquare(startRow, startCol) == 'k') {
     if (myState.colorToMove == 0) {
@@ -150,13 +157,6 @@ void handleMove(GameState &myState, string move) {
   }
 
   if (myState.getPieceAtSquare(startRow, startCol) == 'p') {
-    // PAWN PROMOTION
-    if (myState.colorToMove == 0 && endRow == 7) {
-      myState.board[endRow][endCol] = 'Q';
-    } else if (myState.colorToMove == 1 && endRow == 0) {
-      myState.board[endRow][endCol] = 'q';
-    }
-
     // EN PASSANT
     if (myState.enPassantSquare[0] == endRow &&
         myState.enPassantSquare[1] == endCol) {
