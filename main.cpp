@@ -27,7 +27,7 @@ void UciLoop() {
     } else if (InputFromGUI == "ucinewgame") {
       myState = GameState();
     } else if (InputFromGUI.substr(0, 12) == "position fen") {
-      parseFen(myState, InputFromGUI);
+      // parseFen(myState, InputFromGUI);
     } else if (InputFromGUI.substr(0, 8) == "position") {
       parsePosition(myState, InputFromGUI);
       // string col = MyBoard.colorToMove == 0 ? "white" : "black";
@@ -39,6 +39,7 @@ void UciLoop() {
 }
 
 int main() {
+  cout << "Hello World!" << endl;
   UciLoop();
   return 0;
 }
