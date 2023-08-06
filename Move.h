@@ -33,11 +33,15 @@ public:
   bool isPawnPromotion;
   bool isEnPassant;
   bool isCastle;
+  char pawnPromotionPiece;
 
   Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board);
 
   Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board,
        bool isEnPassant, bool isCastle);
+
+  Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board,
+       bool isEnPassant, bool isCastle, char pawnPromotionPiece);
 
   string getRankFile(int row, int col);
 

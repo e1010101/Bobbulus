@@ -29,9 +29,7 @@ void UciLoop() {
     } else if (InputFromGUI.substr(0, 12) == "position fen") {
       // parseFen(myState, InputFromGUI);
     } else if (InputFromGUI.substr(0, 8) == "position") {
-      parsePosition(myState, InputFromGUI);
-      // string col = MyBoard.colorToMove == 0 ? "white" : "black";
-      // cout << col << endl;
+      myState.parsePosition(InputFromGUI);
     } else if (InputFromGUI.substr(0, 4) == "quit") {
       break;
     }

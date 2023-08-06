@@ -67,18 +67,12 @@ public:
   int getColorOfPiece(int row, int col);
 
   void printBoard();
+
+  void parsePosition(string InputFromGUI);
+
+  Move parseMoveToken(string token);
 };
 
-extern string getSquareNotation(int rank, int file);
-
-extern vector<int> getBoardCoordsFromMove(string move);
-
-extern string getMoveString(int rank1, int file1, int rank2, int file2);
-
-extern void parsePosition(GameState &myState, string InputFromGUI);
-
 extern void parseFen(GameState &myState, string InputFromGUI);
-
-extern void updateCastlingRights(GameState &myState, string move);
 
 #endif // BOARD_H

@@ -7,7 +7,6 @@ using std::endl;
 GameState::GameState()
     : board({}), colorToMove(0), inCheck(false), moveLog({}), pins({}),
       checks({}) {
-  cout << "initializing gamestate..." << endl;
   for (int i = 0; i < 8; i++) {
     board.push_back({});
   }
@@ -19,8 +18,6 @@ GameState::GameState()
   board[5] = {'-', '-', '-', '-', '-', '-', '-', '-'};
   board[6] = {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'};
   board[7] = {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'};
-
-  cout << "initialized!" << endl;
 }
 
 void GameState::makeMove(Move move) {
@@ -58,6 +55,7 @@ void GameState::makeMove(Move move) {
     if (move.endCol - move.startCol == 2) {
       board[move.endRow][move.endCol - 1] = board[move.endRow][move.endCol + 1];
       board[move.endRow][move.endCol + 1] = '-';
+
     } else if (move.endCol - move.startCol == -2) {
       board[move.endRow][move.endCol + 1] = board[move.endRow][move.endCol - 2];
       board[move.endRow][move.endCol - 2] = '-';
@@ -65,6 +63,7 @@ void GameState::makeMove(Move move) {
   }
 
   updateCastlingRights(move);
+  printBoard();
 }
 
 void GameState::updateCastlingRights(Move move) {
@@ -96,7 +95,6 @@ void GameState::updateCastlingRights(Move move) {
 vector<Move> GameState::getValidMoves() {
   vector<Move> validMoves;
   vector<vector<vector<int>>> pinsAndChecks = getPinsAndChecks();
-  // cout << "got pins and checks" << endl;
   vector<vector<int>> pins = pinsAndChecks[0];
   vector<vector<int>> checks = pinsAndChecks[1];
   int kingRow;
@@ -261,7 +259,6 @@ vector<Move> GameState::getAllPossibleMoves() {
         char piece = board[i][j];
         if (piece == 'P' || piece == 'p') {
           getPawnMoves(i, j, moves);
-          cout << moves.size() << endl;
         } else if (piece == 'R' || piece == 'r') {
           getRookMoves(i, j, moves);
         } else if (piece == 'B' || piece == 'b') {
@@ -276,7 +273,6 @@ vector<Move> GameState::getAllPossibleMoves() {
       }
     }
   }
-  cout << moves.size() << endl;
   return moves;
 }
 
@@ -540,53 +536,53 @@ void GameState::getQueensideCastleMoves(int row, int col, vector<Move> &moves) {
   }
 }
 
-void GameState::updateBoard(string move) {
-  if (move.length() == 4) {
-    int rank1 = 7 - (move[1] - '1');
-    int file1 = move[0] - 'a';
-    int rank2 = 7 - (move[3] - '1');
-    int file2 = move[2] - 'a';
-    char pieceMoved = getPieceAtSquare(rank1, file1);
+// void GameState::updateBoard(string move) {
+//   if (move.length() == 4) {
+//     int rank1 = 7 - (move[1] - '1');
+//     int file1 = move[0] - 'a';
+//     int rank2 = 7 - (move[3] - '1');
+//     int file2 = move[2] - 'a';
+//     char pieceMoved = getPieceAtSquare(rank1, file1);
 
-    if (pieceMoved == 'k') {
-      if (abs(file2 - file1) == 2) {
-        board[rank1][file1] = '-';
-        if (file2 == 6) {
-          board[rank1][7] = '-';
-          board[rank1][5] = colorToMove == 1 ? 'R' : 'r';
-          board[rank1][6] = colorToMove == 1 ? 'K' : 'k';
-        } else if (file2 == 2) {
-          board[rank1][0] = '-';
-          board[rank1][3] = colorToMove == 1 ? 'R' : 'r';
-          board[rank1][2] = colorToMove == 1 ? 'K' : 'k';
-        }
-      } else {
-        board[rank2][file2] = board[rank1][file1];
-        board[rank1][file1] = '-';
-      }
-    } else {
-      board[rank2][file2] = board[rank1][file1];
-      board[rank1][file1] = '-';
-    }
+//     if (pieceMoved == 'k') {
+//       if (abs(file2 - file1) == 2) {
+//         board[rank1][file1] = '-';
+//         if (file2 == 6) {
+//           board[rank1][7] = '-';
+//           board[rank1][5] = colorToMove == 1 ? 'R' : 'r';
+//           board[rank1][6] = colorToMove == 1 ? 'K' : 'k';
+//         } else if (file2 == 2) {
+//           board[rank1][0] = '-';
+//           board[rank1][3] = colorToMove == 1 ? 'R' : 'r';
+//           board[rank1][2] = colorToMove == 1 ? 'K' : 'k';
+//         }
+//       } else {
+//         board[rank2][file2] = board[rank1][file1];
+//         board[rank1][file1] = '-';
+//       }
+//     } else {
+//       board[rank2][file2] = board[rank1][file1];
+//       board[rank1][file1] = '-';
+//     }
 
-  } else if (move.length() == 5) {
-    // PAWN PROMOTION
-    string piece = move.substr(4, 1);
-    cout << piece << endl;
-    int rank1 = 7 - (move[1] - '1');
-    int file1 = move[0] - 'a';
-    int rank2 = 7 - (move[3] - '1');
-    int file2 = move[2] - 'a';
+//   } else if (move.length() == 5) {
+//     // PAWN PROMOTION
+//     string piece = move.substr(4, 1);
+//     cout << piece << endl;
+//     int rank1 = 7 - (move[1] - '1');
+//     int file1 = move[0] - 'a';
+//     int rank2 = 7 - (move[3] - '1');
+//     int file2 = move[2] - 'a';
 
-    // WE SWAPPED COLORS FIRST
-    if (colorToMove == 0) {
-      board[rank2][file2] = (char)tolower(piece[0]);
-    } else if (colorToMove == 1) {
-      board[rank2][file2] = (char)toupper(piece[0]);
-    }
-    board[rank1][file1] = '-';
-  }
-}
+//     // WE SWAPPED COLORS FIRST
+//     if (colorToMove == 0) {
+//       board[rank2][file2] = (char)tolower(piece[0]);
+//     } else if (colorToMove == 1) {
+//       board[rank2][file2] = (char)toupper(piece[0]);
+//     }
+//     board[rank1][file1] = '-';
+//   }
+// }
 
 int GameState::getColorOfPiece(int rank, int file) {
   if (board[rank][file] == '-') {
@@ -611,37 +607,14 @@ char GameState::getPieceAtSquare(int rank, int file) {
   return tolower(board[rank][file]);
 }
 
-string getSquareNotation(int rank, int file) {
-  rank = 7 - rank;
-  std::string notation;
-  notation += static_cast<char>('a' + file);
-  notation += static_cast<char>('1' + rank);
-  return notation;
-}
-
-vector<int> getBoardCoordsFromMove(string move) {
-  vector<int> coords;
-  coords.push_back(move[0] - 'a');
-  coords.push_back(7 - (move[1] - '1'));
-  coords.push_back(move[2] - 'a');
-  coords.push_back(7 - (move[3] - '1'));
-  return coords;
-}
-
-string getMoveString(int rank1, int file1, int rank2, int file2) {
-  return getSquareNotation(rank1, file1) + getSquareNotation(rank2, file2);
-}
-
-void parsePosition(GameState &myState, string InputFromGUI) {
+void GameState::parsePosition(string InputFromGUI) {
   // position startpos
   if (InputFromGUI.substr(9, 8) == "startpos" and InputFromGUI.length() == 17) {
-    myState.colorToMove = 0;
+    colorToMove = 0;
   } else if (InputFromGUI.substr(18, 5) == "moves") {
-    vector<string> moves;
     stringstream ss(InputFromGUI);
     string token;
-    int currentTurn = myState.colorToMove;
-    int numMovesMave = myState.moveLog.size();
+    int numMovesMade = moveLog.size();
     int movesCounter = 0;
 
     ss >> token; // position
@@ -649,21 +622,52 @@ void parsePosition(GameState &myState, string InputFromGUI) {
     ss >> token; // moves
 
     while (ss >> token) {
-      myState.colorToMove = currentTurn == 0 ? 1 : 0;
-      if (movesCounter < numMovesMave) {
+      if (movesCounter < numMovesMade) {
         movesCounter++;
         continue;
       }
-      int startCol = token[0] - 'a';
-      int startRow = 7 - (token[1] - '1');
-      int endCol = token[2] - 'a';
-      int endRow = 7 - (token[3] - '1');
-      Move move = Move({startRow, startCol}, {endRow, endCol}, myState.board);
-      myState.updateBoard(token);
-      myState.moveLog.push_back(move);
+      Move move = parseMoveToken(token);
+      makeMove(move);
     }
+  }
+}
 
-    myState.colorToMove = currentTurn;
+Move GameState::parseMoveToken(string token) {
+  if (token.length() == 4) {
+    int startCol = token[0] - 'a';
+    int startRow = 7 - (token[1] - '1');
+    int endCol = token[2] - 'a';
+    int endRow = 7 - (token[3] - '1');
+    char pieceMoved = board[startRow][startCol];
+
+    if (pieceMoved == 'P' || pieceMoved == 'p') {
+      if (endCol == startCol + 1 || endCol == startCol - 1) {
+        if (board[endRow][endCol] == '-') {
+          return Move({startRow, startCol}, {endRow, endCol}, board, true,
+                      false);
+        } else {
+          return Move({startRow, startCol}, {endRow, endCol}, board);
+        }
+      } else {
+        return Move({startRow, startCol}, {endRow, endCol}, board);
+      }
+    } else if (pieceMoved == 'K' || pieceMoved == 'k') {
+      if (abs(endCol - startCol) == 2) {
+        return Move({startRow, startCol}, {endRow, endCol}, board, false, true);
+      } else {
+        return Move({startRow, startCol}, {endRow, endCol}, board);
+      }
+    } else {
+      return Move({startRow, startCol}, {endRow, endCol}, board);
+    }
+  } else {
+    int startCol = token[0] - 'a';
+    int startRow = 7 - (token[1] - '1');
+    int endCol = token[2] - 'a';
+    int endRow = 7 - (token[3] - '1');
+    char promotionPiece = token[4];
+    return Move({startRow, startCol}, {endRow, endCol}, board, false, false,
+                promotionPiece);
   }
 }
 
@@ -749,39 +753,3 @@ void parsePosition(GameState &myState, string InputFromGUI) {
 //   }
 //   cout << myState.colorToMove << endl;
 // }
-
-void updateCastlingRights(GameState &myState, string move) {
-  vector<int> coords = getBoardCoordsFromMove(move);
-  int startCol = coords[0];
-  int startRow = coords[1];
-  int endCol = coords[2];
-  int endRow = coords[3];
-
-  if (myState.getPieceAtSquare(startRow, startCol) == 'k' &&
-      myState.getColorOfPiece(startRow, startCol) == 0) {
-    myState.castleRights[0] = false;
-    myState.castleRights[1] = false;
-  } else if (myState.getPieceAtSquare(startRow, startCol) == 'k' &&
-             myState.getColorOfPiece(startRow, startCol) == 1) {
-    myState.castleRights[2] = false;
-    myState.castleRights[3] = false;
-  } else if (myState.getPieceAtSquare(startRow, startCol) == 'r' &&
-             myState.getColorOfPiece(startRow, startCol) == 0) {
-    if (startRow == 7) {
-      if (startCol == 0) {
-        myState.castleRights[1] = false;
-      } else if (startCol == 7) {
-        myState.castleRights[0] = false;
-      }
-    }
-  } else if (myState.getPieceAtSquare(startRow, startCol) == 'r' &&
-             myState.getColorOfPiece(startRow, startCol) == 1) {
-    if (startRow == 0) {
-      if (startCol == 0) {
-        myState.castleRights[3] = false;
-      } else if (startCol == 7) {
-        myState.castleRights[2] = false;
-      }
-    }
-  }
-}
