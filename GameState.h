@@ -70,9 +70,9 @@ public:
 
   void parsePosition(string InputFromGUI);
 
+  void parseFen(string InputFromGUI);
+
   Move parseMoveToken(string token);
 };
-
-extern void parseFen(GameState &myState, string InputFromGUI);
 
 #endif // BOARD_H

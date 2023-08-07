@@ -9,5 +9,3 @@ using std::string;
 using std::vector;
 
 extern string makeMove(GameState &myState);
-
-extern void handleMove(GameState &myState, string move);

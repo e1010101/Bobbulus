@@ -27,7 +27,7 @@ void UciLoop() {
     } else if (InputFromGUI == "ucinewgame") {
       myState = GameState();
     } else if (InputFromGUI.substr(0, 12) == "position fen") {
-      // parseFen(myState, InputFromGUI);
+      myState.parseFen(InputFromGUI);
     } else if (InputFromGUI.substr(0, 8) == "position") {
       myState.parsePosition(InputFromGUI);
     } else if (InputFromGUI.substr(0, 4) == "quit") {

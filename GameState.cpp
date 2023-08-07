@@ -536,54 +536,6 @@ void GameState::getQueensideCastleMoves(int row, int col, vector<Move> &moves) {
   }
 }
 
-// void GameState::updateBoard(string move) {
-//   if (move.length() == 4) {
-//     int rank1 = 7 - (move[1] - '1');
-//     int file1 = move[0] - 'a';
-//     int rank2 = 7 - (move[3] - '1');
-//     int file2 = move[2] - 'a';
-//     char pieceMoved = getPieceAtSquare(rank1, file1);
-
-//     if (pieceMoved == 'k') {
-//       if (abs(file2 - file1) == 2) {
-//         board[rank1][file1] = '-';
-//         if (file2 == 6) {
-//           board[rank1][7] = '-';
-//           board[rank1][5] = colorToMove == 1 ? 'R' : 'r';
-//           board[rank1][6] = colorToMove == 1 ? 'K' : 'k';
-//         } else if (file2 == 2) {
-//           board[rank1][0] = '-';
-//           board[rank1][3] = colorToMove == 1 ? 'R' : 'r';
-//           board[rank1][2] = colorToMove == 1 ? 'K' : 'k';
-//         }
-//       } else {
-//         board[rank2][file2] = board[rank1][file1];
-//         board[rank1][file1] = '-';
-//       }
-//     } else {
-//       board[rank2][file2] = board[rank1][file1];
-//       board[rank1][file1] = '-';
-//     }
-
-//   } else if (move.length() == 5) {
-//     // PAWN PROMOTION
-//     string piece = move.substr(4, 1);
-//     cout << piece << endl;
-//     int rank1 = 7 - (move[1] - '1');
-//     int file1 = move[0] - 'a';
-//     int rank2 = 7 - (move[3] - '1');
-//     int file2 = move[2] - 'a';
-
-//     // WE SWAPPED COLORS FIRST
-//     if (colorToMove == 0) {
-//       board[rank2][file2] = (char)tolower(piece[0]);
-//     } else if (colorToMove == 1) {
-//       board[rank2][file2] = (char)toupper(piece[0]);
-//     }
-//     board[rank1][file1] = '-';
-//   }
-// }
-
 int GameState::getColorOfPiece(int rank, int file) {
   if (board[rank][file] == '-') {
     return -1;
@@ -671,85 +623,83 @@ Move GameState::parseMoveToken(string token) {
   }
 }
 
-// void parseFen(GameState &myState, string InputFromGUI) {
-//   string fen = InputFromGUI.substr(12, InputFromGUI.length() - 12);
-//   string moves = "";
-//   for (int i = 0; i < fen.length(); i++) {
-//     if (fen[i] == 'm' && fen[i + 1] == 'o' && fen[i + 2] == 'v' &&
-//         fen[i + 3] == 'e' && fen[i + 4] == 's') {
-//       moves = fen.substr(i + 6, fen.length() - i - 6);
-//       fen = fen.substr(0, i - 1);
-//       break;
-//     }
-//   }
+void GameState::parseFen(string InputFromGUI) {
+  string fen = InputFromGUI.substr(12, InputFromGUI.length() - 12);
+  string moves = "";
+  for (int i = 0; i < fen.length(); i++) {
+    if (fen[i] == 'm' && fen[i + 1] == 'o' && fen[i + 2] == 'v' &&
+        fen[i + 3] == 'e' && fen[i + 4] == 's') {
+      moves = fen.substr(i + 6, fen.length() - i - 6);
+      fen = fen.substr(0, i - 1);
+      break;
+    }
+  }
 
-//   for (int i = 0; i < 8; i++) {
-//     int file = 0;
-//     for (int j = 0; j < fen.length(); j++) {
-//       if (fen[j] == '/') {
-//         break;
-//       } else if (fen[j] >= '1' and fen[j] <= '8') {
-//         int numSpaces = fen[j] - '0';
-//         for (int k = 0; k < numSpaces; k++) {
-//           myState.board[i][file] = '-';
-//           file++;
-//         }
-//       } else if (fen[j] != ' ') {
-//         myState.board[i][file] = fen[j];
-//         file++;
-//       }
-//     }
-//     fen = fen.substr(fen.find('/') + 1, fen.length() - fen.find('/'));
-//   }
+  for (int i = 0; i < 8; i++) {
+    int file = 0;
+    for (int j = 0; j < fen.length(); j++) {
+      if (fen[j] == '/') {
+        break;
+      } else if (fen[j] >= '1' and fen[j] <= '8') {
+        int numSpaces = fen[j] - '0';
+        for (int k = 0; k < numSpaces; k++) {
+          board[i][file] = '-';
+          file++;
+        }
+      } else if (fen[j] != ' ') {
+        board[i][file] = fen[j];
+        file++;
+      }
+    }
+    fen = fen.substr(fen.find('/') + 1, fen.length() - fen.find('/'));
+  }
 
-//   if (fen[0] == 'w') {
-//     myState.colorToMove = 0;
-//   } else {
-//     myState.colorToMove = 1;
-//   }
+  if (fen[0] == 'w') {
+    colorToMove = 0;
+  } else {
+    colorToMove = 1;
+  }
 
-//   if (fen[2] == 'K') {
-//     myState.castleRights[0] = true;
-//   } else {
-//     myState.castleRights[0] = false;
-//   }
+  if (fen[2] == 'K') {
+    castleRights[0] = true;
+  } else {
+    castleRights[0] = false;
+  }
 
-//   if (fen[3] == 'Q') {
-//     myState.castleRights[1] = true;
-//   } else {
-//     myState.castleRights[1] = false;
-//   }
+  if (fen[3] == 'Q') {
+    castleRights[1] = true;
+  } else {
+    castleRights[1] = false;
+  }
 
-//   if (fen[4] == 'k') {
-//     myState.castleRights[2] = true;
-//   } else {
-//     myState.castleRights[2] = false;
-//   }
+  if (fen[4] == 'k') {
+    castleRights[2] = true;
+  } else {
+    castleRights[2] = false;
+  }
 
-//   if (fen[5] == 'q') {
-//     myState.castleRights[3] = true;
-//   } else {
-//     myState.castleRights[3] = false;
-//   }
+  if (fen[5] == 'q') {
+    castleRights[3] = true;
+  } else {
+    castleRights[3] = false;
+  }
 
-//   if (moves != "") {
-//     vector<string> movesVector;
-//     stringstream ss(moves);
-//     string token;
-//     int currentTurn = myState.colorToMove;
-//     int numMovesMave = myState.moveLog.size();
-//     int movesCounter = 0;
+  if (moves != "") {
+    vector<string> movesVector;
+    stringstream ss(moves);
+    string token;
+    int currentTurn = colorToMove;
+    int numMovesMade = moveLog.size();
+    int movesCounter = 0;
 
-//     while (ss >> token) {
-//       cout << token << endl;
-//       myState.colorToMove = currentTurn == 0 ? 1 : 0;
-//       if (movesCounter < numMovesMave) {
-//         movesCounter++;
-//         continue;
-//       }
-//       myState.updateBoard(token);
-//       myState.moveLog.push_back(token);
-//     }
-//   }
-//   cout << myState.colorToMove << endl;
-// }
+    while (ss >> token) {
+      if (movesCounter < numMovesMade) {
+        movesCounter++;
+        continue;
+      }
+      Move move = parseMoveToken(token);
+      makeMove(move);
+    }
+  }
+  cout << colorToMove << endl;
+}
