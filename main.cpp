@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include <string>
 
 #include "Engine.h"
 #include "GameState.h"
@@ -37,7 +38,6 @@ void UciLoop() {
 }
 
 int main() {
-  cout << "Hello World!" << endl;
   UciLoop();
   return 0;
 }

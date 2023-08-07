@@ -94,6 +94,7 @@ void GameState::updateCastlingRights(Move move) {
 
 vector<Move> GameState::getValidMoves() {
   vector<Move> validMoves;
+  vector<Move> possibleMoves;
   vector<vector<vector<int>>> pinsAndChecks = getPinsAndChecks();
   vector<vector<int>> pins = pinsAndChecks[0];
   vector<vector<int>> checks = pinsAndChecks[1];
@@ -110,7 +111,13 @@ vector<Move> GameState::getValidMoves() {
 
   if (checks.size() != 0) {
     if (checks.size() == 1) {
-      validMoves = getAllPossibleMoves();
+      cout << "In check!" << endl;
+      cout << "Check: " << checks[0][0] << " " << checks[0][1] << " "
+           << checks[0][2] << " " << checks[0][3] << endl;
+      possibleMoves = getAllPossibleMoves();
+      for (int i = 0; i < possibleMoves.size(); i++) {
+        cout << possibleMoves[i].getChessNotation() << endl;
+      }
       vector<int> check = checks[0];
       int checkRow = check[0];
       int checkCol = check[1];
@@ -128,20 +135,22 @@ vector<Move> GameState::getValidMoves() {
           }
         }
       }
-      for (int i = validMoves.size() - 1; i >= 0; i--) {
-        if (validMoves[i].pieceMoved != 'K' &&
-            validMoves[i].pieceMoved != 'k') {
+
+      for (int i = 0; i < possibleMoves.size(); i++) {
+        if (possibleMoves[i].pieceMoved != 'K' &&
+            possibleMoves[i].pieceMoved != 'k') {
           for (int j = 0; j < validSquares.size(); j++) {
             bool foundValidSquare = false;
-            if (validMoves[i].endRow == validSquares[j][0] &&
-                validMoves[i].endCol == validSquares[j][1]) {
+            if (possibleMoves[i].endRow == validSquares[j][0] &&
+                possibleMoves[i].endCol == validSquares[j][1]) {
               foundValidSquare = true;
+              validMoves.push_back(possibleMoves[i]);
               break;
             }
-            if (!foundValidSquare) {
-              validMoves.erase(validMoves.begin() + i);
-            }
           }
+        } else {
+          // ALL KING MOVES FOUND ARE VALID
+          validMoves.push_back(possibleMoves[i]);
         }
       }
     } else {
@@ -273,6 +282,9 @@ vector<Move> GameState::getAllPossibleMoves() {
       }
     }
   }
+  // for (int i = 0; i < moves.size(); i++) {
+  //   cout << moves[i].getChessNotation() << endl;
+  // }
   return moves;
 }
 

@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 
+#include "AI.h"
 #include "GameState.h"
+
 
 using std::string;
 using std::vector;
