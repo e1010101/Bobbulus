@@ -21,6 +21,7 @@ GameState::GameState()
 }
 
 void GameState::makeMove(Move move) {
+  cout << "moving" << endl;
   board[move.startRow][move.startCol] = '-';
   board[move.endRow][move.endCol] = move.pieceMoved;
   moveLog.push_back(move);
@@ -64,6 +65,7 @@ void GameState::makeMove(Move move) {
 
   updateCastlingRights(move);
   printBoard();
+  cout << colorToMove << endl;
 }
 
 void GameState::updateCastlingRights(Move move) {
@@ -100,7 +102,7 @@ vector<Move> GameState::getValidMoves() {
   vector<vector<int>> checks = pinsAndChecks[1];
   int kingRow;
   int kingCol;
-
+  cout << "getting valid moves for " << colorToMove << endl;
   if (colorToMove == 0) {
     kingRow = whiteKingLocation[0];
     kingCol = whiteKingLocation[1];
@@ -158,9 +160,12 @@ vector<Move> GameState::getValidMoves() {
     }
   } else {
     validMoves = getAllPossibleMoves();
+
+    cout << validMoves.size() << endl;
     getCastleMoves(kingRow, kingCol, validMoves);
   }
 
+  cout << validMoves.size() << endl;
   return validMoves;
 }
 
@@ -665,6 +670,7 @@ void GameState::parseFen(string InputFromGUI) {
     }
     fen = fen.substr(fen.find('/') + 1, fen.length() - fen.find('/'));
   }
+  fen = fen.substr(fen.find(' ') + 1, fen.length() - fen.find(' '));
 
   if (fen[0] == 'w') {
     colorToMove = 0;
@@ -695,23 +701,14 @@ void GameState::parseFen(string InputFromGUI) {
   } else {
     castleRights[3] = false;
   }
-
   if (moves != "") {
-    vector<string> movesVector;
     stringstream ss(moves);
     string token;
-    int currentTurn = colorToMove;
-    int numMovesMade = moveLog.size();
-    int movesCounter = 0;
 
     while (ss >> token) {
-      if (movesCounter < numMovesMade) {
-        movesCounter++;
-        continue;
-      }
       Move move = parseMoveToken(token);
+      cout << "making move: " << move.getChessNotation() << endl;
       makeMove(move);
     }
   }
-  cout << colorToMove << endl;
 }
