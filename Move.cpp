@@ -35,6 +35,13 @@ Move::Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board,
   if (isEnPassant) {
     pieceCaptured = pieceMoved == 'P' ? 'p' : 'P';
   }
+  if (isPawnPromotion) {
+    if (pieceMoved == 'P') {
+      pawnPromotionPiece = 'Q';
+    } else if (pieceMoved == 'p') {
+      pawnPromotionPiece = 'q';
+    }
+  }
 }
 
 Move::Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board,
@@ -52,6 +59,13 @@ Move::Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board,
   if (isEnPassant) {
     pieceCaptured = pieceMoved == 'P' ? 'p' : 'P';
   }
+  if (isPawnPromotion) {
+    if (pieceMoved == 'P') {
+      pawnPromotionPiece = 'Q';
+    } else if (pieceMoved == 'p') {
+      pawnPromotionPiece = 'q';
+    }
+  }
 }
 
 string Move::getRankFile(int row, int col) {
@@ -61,5 +75,9 @@ string Move::getRankFile(int row, int col) {
 }
 
 string Move::getChessNotation() {
+  if (isPawnPromotion) {
+    return getRankFile(startRow, startCol) + getRankFile(endRow, endCol) +
+           string(1, pawnPromotionPiece);
+  }
   return getRankFile(startRow, startCol) + getRankFile(endRow, endCol);
 }

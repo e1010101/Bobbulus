@@ -34,7 +34,7 @@ void GameState::makeMove(Move move) {
   }
 
   if (move.isPawnPromotion) {
-    board[move.endRow][move.endCol] = move.pieceMoved == 'P' ? 'Q' : 'q';
+    board[move.endRow][move.endCol] = move.pawnPromotionPiece;
   }
 
   if (move.isEnPassant) {
