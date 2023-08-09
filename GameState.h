@@ -27,6 +27,8 @@ public:
   vector<int> enPassantSquare = {-1000, -1000};
   // CASTLE RIGHTS: WKS, WQS, BKS, BQS
   vector<bool> castleRights = {true, true, true, true};
+  bool checkmate;
+  bool stalemate;
 
   GameState();
 
@@ -73,6 +75,10 @@ public:
   void parseFen(string InputFromGUI);
 
   Move parseMoveToken(string token);
+
+  bool isCheckmate();
+
+  bool isStalemate();
 };
 
 #endif // BOARD_H

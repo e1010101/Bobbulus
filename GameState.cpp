@@ -6,7 +6,7 @@ using std::endl;
 
 GameState::GameState()
     : board({}), colorToMove(0), inCheck(false), moveLog({}), pins({}),
-      checks({}) {
+      checks({}), checkmate(false), stalemate(false) {
   for (int i = 0; i < 8; i++) {
     board.push_back({});
   }
@@ -21,7 +21,6 @@ GameState::GameState()
 }
 
 void GameState::makeMove(Move move) {
-  cout << "moving" << endl;
   board[move.startRow][move.startCol] = '-';
   board[move.endRow][move.endCol] = move.pieceMoved;
   moveLog.push_back(move);
@@ -65,7 +64,6 @@ void GameState::makeMove(Move move) {
 
   updateCastlingRights(move);
   printBoard();
-  cout << colorToMove << endl;
 }
 
 void GameState::updateCastlingRights(Move move) {
@@ -102,7 +100,6 @@ vector<Move> GameState::getValidMoves() {
   vector<vector<int>> checks = pinsAndChecks[1];
   int kingRow;
   int kingCol;
-  cout << "getting valid moves for " << colorToMove << endl;
   if (colorToMove == 0) {
     kingRow = whiteKingLocation[0];
     kingCol = whiteKingLocation[1];
@@ -164,8 +161,6 @@ vector<Move> GameState::getValidMoves() {
     cout << validMoves.size() << endl;
     getCastleMoves(kingRow, kingCol, validMoves);
   }
-
-  cout << validMoves.size() << endl;
   return validMoves;
 }
 
@@ -287,9 +282,6 @@ vector<Move> GameState::getAllPossibleMoves() {
       }
     }
   }
-  // for (int i = 0; i < moves.size(); i++) {
-  //   cout << moves[i].getChessNotation() << endl;
-  // }
   return moves;
 }
 
@@ -601,45 +593,6 @@ void GameState::parsePosition(string InputFromGUI) {
   }
 }
 
-Move GameState::parseMoveToken(string token) {
-  if (token.length() == 4) {
-    int startCol = token[0] - 'a';
-    int startRow = 7 - (token[1] - '1');
-    int endCol = token[2] - 'a';
-    int endRow = 7 - (token[3] - '1');
-    char pieceMoved = board[startRow][startCol];
-
-    if (pieceMoved == 'P' || pieceMoved == 'p') {
-      if (endCol == startCol + 1 || endCol == startCol - 1) {
-        if (board[endRow][endCol] == '-') {
-          return Move({startRow, startCol}, {endRow, endCol}, board, true,
-                      false);
-        } else {
-          return Move({startRow, startCol}, {endRow, endCol}, board);
-        }
-      } else {
-        return Move({startRow, startCol}, {endRow, endCol}, board);
-      }
-    } else if (pieceMoved == 'K' || pieceMoved == 'k') {
-      if (abs(endCol - startCol) == 2) {
-        return Move({startRow, startCol}, {endRow, endCol}, board, false, true);
-      } else {
-        return Move({startRow, startCol}, {endRow, endCol}, board);
-      }
-    } else {
-      return Move({startRow, startCol}, {endRow, endCol}, board);
-    }
-  } else {
-    int startCol = token[0] - 'a';
-    int startRow = 7 - (token[1] - '1');
-    int endCol = token[2] - 'a';
-    int endRow = 7 - (token[3] - '1');
-    char promotionPiece = token[4];
-    return Move({startRow, startCol}, {endRow, endCol}, board, false, false,
-                promotionPiece);
-  }
-}
-
 void GameState::parseFen(string InputFromGUI) {
   string fen = InputFromGUI.substr(12, InputFromGUI.length() - 12);
   string moves = "";
@@ -707,8 +660,63 @@ void GameState::parseFen(string InputFromGUI) {
 
     while (ss >> token) {
       Move move = parseMoveToken(token);
-      cout << "making move: " << move.getChessNotation() << endl;
       makeMove(move);
     }
   }
+}
+
+Move GameState::parseMoveToken(string token) {
+  if (token.length() == 4) {
+    int startCol = token[0] - 'a';
+    int startRow = 7 - (token[1] - '1');
+    int endCol = token[2] - 'a';
+    int endRow = 7 - (token[3] - '1');
+    char pieceMoved = board[startRow][startCol];
+
+    if (pieceMoved == 'P' || pieceMoved == 'p') {
+      if (endCol == startCol + 1 || endCol == startCol - 1) {
+        if (board[endRow][endCol] == '-') {
+          return Move({startRow, startCol}, {endRow, endCol}, board, true,
+                      false);
+        } else {
+          return Move({startRow, startCol}, {endRow, endCol}, board);
+        }
+      } else {
+        return Move({startRow, startCol}, {endRow, endCol}, board);
+      }
+    } else if (pieceMoved == 'K' || pieceMoved == 'k') {
+      if (abs(endCol - startCol) == 2) {
+        return Move({startRow, startCol}, {endRow, endCol}, board, false, true);
+      } else {
+        return Move({startRow, startCol}, {endRow, endCol}, board);
+      }
+    } else {
+      return Move({startRow, startCol}, {endRow, endCol}, board);
+    }
+  } else {
+    int startCol = token[0] - 'a';
+    int startRow = 7 - (token[1] - '1');
+    int endCol = token[2] - 'a';
+    int endRow = 7 - (token[3] - '1');
+    char promotionPiece = token[4];
+    return Move({startRow, startCol}, {endRow, endCol}, board, false, false,
+                promotionPiece);
+  }
+}
+
+bool GameState::isCheckmate() {
+  if (getValidMoves().size() == 0) {
+    if (squareUnderAttack(whiteKingLocation[0], whiteKingLocation[1]) ||
+        squareUnderAttack(blackKingLocation[0], blackKingLocation[1])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool GameState::isStalemate() {
+  if (getValidMoves().size() == 0) {
+    return true;
+  }
+  return false;
 }
