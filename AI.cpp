@@ -6,9 +6,9 @@
 using std::cout;
 using std::endl;
 
-unordered_map<char, int> pieceScore = {{'K', 0}, {'Q', 10}, {'R', 5}, {'B', 3},
-                                       {'N', 3}, {'P', 1},  {'k', 0}, {'q', 10},
-                                       {'r', 5}, {'b', 3},  {'n', 3}, {'p', 1}};
+unordered_map<char, int> pieceScore = {
+    {'K', 0}, {'Q', 10},  {'R', 5},  {'B', 3},  {'N', 3},  {'P', 1},
+    {'k', 0}, {'q', -10}, {'r', -5}, {'b', -3}, {'n', -3}, {'p', -1}};
 
 int CHECKMATE = 1000;
 int STALEMATE = 0;
