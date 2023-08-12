@@ -63,7 +63,6 @@ void GameState::makeMove(Move move) {
   }
 
   updateCastlingRights(move);
-  printBoard();
 }
 
 void GameState::updateCastlingRights(Move move) {
@@ -110,13 +109,7 @@ vector<Move> GameState::getValidMoves() {
 
   if (checks.size() != 0) {
     if (checks.size() == 1) {
-      cout << "In check!" << endl;
-      cout << "Check: " << checks[0][0] << " " << checks[0][1] << " "
-           << checks[0][2] << " " << checks[0][3] << endl;
       possibleMoves = getAllPossibleMoves();
-      for (int i = 0; i < possibleMoves.size(); i++) {
-        cout << possibleMoves[i].getChessNotation() << endl;
-      }
       vector<int> check = checks[0];
       int checkRow = check[0];
       int checkCol = check[1];
@@ -157,8 +150,6 @@ vector<Move> GameState::getValidMoves() {
     }
   } else {
     validMoves = getAllPossibleMoves();
-
-    cout << validMoves.size() << endl;
     getCastleMoves(kingRow, kingCol, validMoves);
   }
   return validMoves;
@@ -189,7 +180,7 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
                                     {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
   for (int j = 0; j < directions.size(); j++) {
     vector<int> direction = directions[j];
-    vector<int> possiblePin = {-1000, -1000};
+    vector<int> possiblePin = {-1000, -1000, -1000, -1000};
     for (int i = 1; i < 8; i++) {
       int endRow = startRow + direction[0] * i;
       int endCol = startCol + direction[1] * i;
@@ -200,6 +191,8 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
           if (possiblePin[0] == -1000 && possiblePin[1] == -1000) {
             possiblePin[0] = endRow;
             possiblePin[1] = endCol;
+            possiblePin[2] = direction[0];
+            possiblePin[3] = direction[1];
           } else {
             break;
           }
@@ -293,9 +286,7 @@ void GameState::getPawnMoves(int row, int col, vector<Move> &moves) {
       piecePinned = true;
       pinDirection[0] = pins[i][2];
       pinDirection[1] = pins[i][3];
-      if (board[row][col] != 'Q' && board[row][col] != 'q') {
-        pins.erase(pins.begin() + i);
-      }
+      pins.erase(pins.begin() + i);
       break;
     }
   }
