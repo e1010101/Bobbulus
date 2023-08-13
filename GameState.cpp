@@ -697,8 +697,10 @@ Move GameState::parseMoveToken(string token) {
 
 bool GameState::isCheckmate() {
   if (getValidMoves().size() == 0) {
-    if (squareUnderAttack(whiteKingLocation[0], whiteKingLocation[1]) ||
-        squareUnderAttack(blackKingLocation[0], blackKingLocation[1])) {
+    if ((colorToMove == 0 &&
+         squareUnderAttack(whiteKingLocation[0], whiteKingLocation[1])) ||
+        (colorToMove == 1 &&
+         squareUnderAttack(blackKingLocation[0], blackKingLocation[1]))) {
       return true;
     }
   }
@@ -707,7 +709,12 @@ bool GameState::isCheckmate() {
 
 bool GameState::isStalemate() {
   if (getValidMoves().size() == 0) {
-    return true;
+    if ((colorToMove == 0 &&
+         !squareUnderAttack(whiteKingLocation[0], whiteKingLocation[1])) ||
+        (colorToMove == 1 &&
+         !squareUnderAttack(blackKingLocation[0], blackKingLocation[1]))) {
+      return true;
+    }
   }
   return false;
 }
