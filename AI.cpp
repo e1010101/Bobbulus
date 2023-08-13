@@ -92,13 +92,13 @@ int findMoveNegaMax(GameState myState, vector<Move> validMoves, int depth,
 }
 
 int evaluateGameState(GameState myState) {
-  if (myState.isCheckmate()) {
+  if (myState.checkmate) {
     if (myState.colorToMove == 0) {
       return -CHECKMATE;
     } else {
       return CHECKMATE;
     }
-  } else if (myState.isStalemate()) {
+  } else if (myState.stalemate) {
     return STALEMATE;
   }
 

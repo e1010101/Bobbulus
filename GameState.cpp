@@ -24,7 +24,7 @@ void GameState::makeMove(Move move) {
   board[move.startRow][move.startCol] = '-';
   board[move.endRow][move.endCol] = move.pieceMoved;
   moveLog.push_back(move);
-  colorToMove = colorToMove == 0 ? 1 : 0;
+  this->colorToMove = this->colorToMove == 0 ? 1 : 0;
   if (move.pieceMoved == 'K') {
     whiteKingLocation[0] = move.endRow;
     whiteKingLocation[1] = move.endCol;
@@ -95,11 +95,12 @@ vector<Move> GameState::getValidMoves() {
   vector<Move> validMoves;
   vector<Move> possibleMoves;
   vector<vector<vector<int>>> pinsAndChecks = getPinsAndChecks();
-  vector<vector<int>> pins = pinsAndChecks[0];
-  vector<vector<int>> checks = pinsAndChecks[1];
+  this->pins = pinsAndChecks[0];
+  this->checks = pinsAndChecks[1];
   int kingRow;
   int kingCol;
-  if (colorToMove == 0) {
+
+  if (this->colorToMove == 0) {
     kingRow = whiteKingLocation[0];
     kingCol = whiteKingLocation[1];
   } else {
@@ -107,10 +108,10 @@ vector<Move> GameState::getValidMoves() {
     kingCol = blackKingLocation[1];
   }
 
-  if (checks.size() != 0) {
-    if (checks.size() == 1) {
+  if (this->inCheck) {
+    if (this->checks.size() == 1) {
       possibleMoves = getAllPossibleMoves();
-      vector<int> check = checks[0];
+      vector<int> check = this->checks[0];
       int checkRow = check[0];
       int checkCol = check[1];
       char pieceChecking = board[checkRow][checkCol];
@@ -152,6 +153,18 @@ vector<Move> GameState::getValidMoves() {
     validMoves = getAllPossibleMoves();
     getCastleMoves(kingRow, kingCol, validMoves);
   }
+
+  if (validMoves.size() == 0) {
+    if (this->inCheck) {
+      this->checkmate = true;
+    } else {
+      this->stalemate = true;
+    }
+  } else {
+    this->checkmate = false;
+    this->stalemate = false;
+  }
+
   return validMoves;
 }
 
@@ -159,12 +172,14 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
   vector<vector<vector<int>>> pinsAndChecks;
   vector<vector<int>> pins;
   vector<vector<int>> checks;
+  bool tempInCheck = false;
+
   int enemyColor;
   int allyColor;
   int startRow;
   int startCol;
 
-  if (colorToMove == 0) {
+  if (this->colorToMove == 0) {
     enemyColor = 1;
     allyColor = 0;
     startRow = whiteKingLocation[0];
@@ -205,6 +220,7 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
                 (enemyColor == 1 && 4 <= j && j <= 5))) ||
               (type == 'q')) {
             if (possiblePin[0] == -1000 && possiblePin[1] == -1000) {
+              tempInCheck = true;
               checks.push_back({endRow, endCol, direction[0], direction[1]});
               break;
             } else {
@@ -228,12 +244,14 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
     if (0 <= endRow && endRow < 8 && 0 <= endCol && endCol < 8) {
       char endPiece = board[endRow][endCol];
       if (endPiece == (enemyColor == 0 ? 'N' : 'n')) {
+        tempInCheck = true;
         checks.push_back(
             {endRow, endCol, knightMoves[i][0], knightMoves[i][1]});
       }
     }
   }
 
+  inCheck = tempInCheck;
   pinsAndChecks.push_back(pins);
   pinsAndChecks.push_back(checks);
 
@@ -241,9 +259,9 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
 }
 
 bool GameState::squareUnderAttack(int row, int col) {
-  colorToMove = 1 - colorToMove;
+  this->colorToMove = 1 - this->colorToMove;
   vector<Move> opponentMoves = getAllPossibleMoves();
-  colorToMove = 1 - colorToMove;
+  this->colorToMove = 1 - this->colorToMove;
   for (int i = 0; i < opponentMoves.size(); i++) {
     Move move = opponentMoves[i];
     if (move.endRow == row && move.endCol == col) {
@@ -257,7 +275,7 @@ vector<Move> GameState::getAllPossibleMoves() {
   vector<Move> moves = {};
   for (int i = 0; i < board.size(); i++) {
     for (int j = 0; j < board[0].size(); j++) {
-      if (getColorOfPiece(i, j) == colorToMove) {
+      if (getColorOfPiece(i, j) == this->colorToMove) {
         char piece = board[i][j];
         if (piece == 'P' || piece == 'p') {
           getPawnMoves(i, j, moves);
@@ -291,7 +309,7 @@ void GameState::getPawnMoves(int row, int col, vector<Move> &moves) {
     }
   }
 
-  if (colorToMove == 0) {
+  if (this->colorToMove == 0) {
     if (board[row - 1][col] == '-') {
       if (!piecePinned || (pinDirection[0] == -1 && pinDirection[1] == 0)) {
         moves.push_back(Move({row, col}, {row - 1, col}, board));
@@ -372,7 +390,7 @@ void GameState::getRookMoves(int row, int col, vector<Move> &moves) {
   }
 
   vector<vector<int>> directions = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
-  int enemyColor = colorToMove == 0 ? 1 : 0;
+  int enemyColor = this->colorToMove == 0 ? 1 : 0;
   for (int i = 0; i < directions.size(); i++) {
     for (int j = 1; j < 8; j++) {
       int endRow = row + directions[i][0] * j;
@@ -415,7 +433,7 @@ void GameState::getBishopMoves(int row, int col, vector<Move> &moves) {
   }
 
   vector<vector<int>> directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
-  int enemyColor = colorToMove == 0 ? 1 : 0;
+  int enemyColor = this->colorToMove == 0 ? 1 : 0;
   for (int i = 0; i < directions.size(); i++) {
     for (int j = 1; j < 8; j++) {
       int endRow = row + directions[i][0] * j;
@@ -456,7 +474,7 @@ void GameState::getKnightMoves(int row, int col, vector<Move> &moves) {
   vector<vector<int>> knightMoves = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
                                      {1, -2},  {1, 2},  {2, -1},  {2, 1}};
 
-  int allyColor = colorToMove == 0 ? 0 : 1;
+  int allyColor = this->colorToMove == 0 ? 0 : 1;
   for (int i = 0; i < knightMoves.size(); i++) {
     int endRow = row + knightMoves[i][0];
     int endCol = col + knightMoves[i][1];
@@ -479,7 +497,7 @@ void GameState::getQueenMoves(int row, int col, vector<Move> &moves) {
 void GameState::getKingMoves(int row, int col, vector<Move> &moves) {
   vector<int> rowMoves = {-1, -1, -1, 0, 0, 1, 1, 1};
   vector<int> colMoves = {-1, 0, 1, -1, 1, -1, 0, 1};
-  int allyColor = colorToMove == 0 ? 0 : 1;
+  int allyColor = this->colorToMove == 0 ? 0 : 1;
   for (int i = 0; i < 8; i++) {
     int endRow = row + rowMoves[i];
     int endCol = col + colMoves[i];
@@ -509,12 +527,12 @@ void GameState::getCastleMoves(int row, int col, vector<Move> &moves) {
   if (squareUnderAttack(row, col)) {
     return;
   }
-  if ((colorToMove == 0 && castleRights[0]) ||
-      (colorToMove == 1 && castleRights[2])) {
+  if ((this->colorToMove == 0 && castleRights[0]) ||
+      (this->colorToMove == 1 && castleRights[2])) {
     getKingsideCastleMoves(row, col, moves);
   }
-  if ((colorToMove == 0 && castleRights[1]) ||
-      (colorToMove == 1 && castleRights[3])) {
+  if ((this->colorToMove == 0 && castleRights[1]) ||
+      (this->colorToMove == 1 && castleRights[3])) {
     getQueensideCastleMoves(row, col, moves);
   }
 }
@@ -562,7 +580,7 @@ char GameState::getPieceAtSquare(int rank, int file) {
 void GameState::parsePosition(string InputFromGUI) {
   // position startpos
   if (InputFromGUI.substr(9, 8) == "startpos" and InputFromGUI.length() == 17) {
-    colorToMove = 0;
+    this->colorToMove = 0;
   } else if (InputFromGUI.substr(18, 5) == "moves") {
     stringstream ss(InputFromGUI);
     string token;
@@ -617,9 +635,9 @@ void GameState::parseFen(string InputFromGUI) {
   fen = fen.substr(fen.find(' ') + 1, fen.length() - fen.find(' '));
 
   if (fen[0] == 'w') {
-    colorToMove = 0;
+    this->colorToMove = 0;
   } else {
-    colorToMove = 1;
+    this->colorToMove = 1;
   }
 
   if (fen[2] == 'K') {
@@ -693,28 +711,4 @@ Move GameState::parseMoveToken(string token) {
     return Move({startRow, startCol}, {endRow, endCol}, board, false, false,
                 promotionPiece);
   }
-}
-
-bool GameState::isCheckmate() {
-  if (getValidMoves().size() == 0) {
-    if ((colorToMove == 0 &&
-         squareUnderAttack(whiteKingLocation[0], whiteKingLocation[1])) ||
-        (colorToMove == 1 &&
-         squareUnderAttack(blackKingLocation[0], blackKingLocation[1]))) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool GameState::isStalemate() {
-  if (getValidMoves().size() == 0) {
-    if ((colorToMove == 0 &&
-         !squareUnderAttack(whiteKingLocation[0], whiteKingLocation[1])) ||
-        (colorToMove == 1 &&
-         !squareUnderAttack(blackKingLocation[0], blackKingLocation[1]))) {
-      return true;
-    }
-  }
-  return false;
 }

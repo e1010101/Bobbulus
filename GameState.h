@@ -75,10 +75,6 @@ public:
   void parseFen(string InputFromGUI);
 
   Move parseMoveToken(string token);
-
-  bool isCheckmate();
-
-  bool isStalemate();
 };
 
 #endif // BOARD_H
