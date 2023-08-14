@@ -19,6 +19,13 @@ Move::Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board)
   if (isEnPassant) {
     pieceCaptured = pieceMoved == 'P' ? 'p' : 'P';
   }
+  if (isPawnPromotion) {
+    if (pieceMoved == 'P') {
+      pawnPromotionPiece = 'Q';
+    } else if (pieceMoved == 'p') {
+      pawnPromotionPiece = 'q';
+    }
+  }
 }
 
 Move::Move(vector<int> startSq, vector<int> endSq, vector<vector<char>> board,

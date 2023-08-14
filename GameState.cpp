@@ -5,8 +5,9 @@ using std::cout;
 using std::endl;
 
 GameState::GameState()
-    : board({}), colorToMove(0), inCheck(false), moveLog({}), pins({}),
-      checks({}), checkmate(false), stalemate(false) {
+    : board({}), colorToMove(0), inCheck(false), moveLog({}), enPassantLog({}),
+      castleRightsLog({}), pins({}), checks({}), checkmate(false),
+      stalemate(false) {
   for (int i = 0; i < 8; i++) {
     board.push_back({});
   }
@@ -62,7 +63,57 @@ void GameState::makeMove(Move move) {
     }
   }
 
+  this->enPassantLog.push_back(enPassantSquare);
   updateCastlingRights(move);
+  this->castleRightsLog.push_back(castleRights);
+}
+
+void GameState::undoMove() {
+  if (moveLog.size() != 0) {
+    Move lastMove = moveLog[moveLog.size() - 1];
+    moveLog.pop_back();
+    board[lastMove.startRow][lastMove.startCol] = lastMove.pieceMoved;
+    board[lastMove.endRow][lastMove.endCol] = lastMove.pieceCaptured;
+    this->colorToMove = this->colorToMove == 0 ? 1 : 0;
+
+    if (lastMove.pieceMoved == 'K') {
+      this->whiteKingLocation[0] = lastMove.startRow;
+      this->whiteKingLocation[1] = lastMove.startCol;
+    } else if (lastMove.pieceMoved == 'k') {
+      this->blackKingLocation[0] = lastMove.startRow;
+      this->blackKingLocation[1] = lastMove.startCol;
+    }
+
+    if (lastMove.isEnPassant) {
+      board[lastMove.endRow][lastMove.endCol] = '-';
+      board[lastMove.startRow][lastMove.endCol] = lastMove.pieceCaptured;
+    }
+
+    if (this->enPassantLog.size() != 0) {
+      this->enPassantSquare = enPassantLog[enPassantLog.size() - 1];
+      this->enPassantLog.pop_back();
+    }
+
+    if (this->castleRightsLog.size() != 0) {
+      this->castleRights = castleRightsLog[castleRightsLog.size() - 1];
+      this->castleRightsLog.pop_back();
+    }
+
+    if (lastMove.isCastle) {
+      if (lastMove.endCol - lastMove.startCol == 2) {
+        board[lastMove.endRow][lastMove.endCol + 1] =
+            board[lastMove.endRow][lastMove.endCol - 1];
+        board[lastMove.endRow][lastMove.endCol - 1] = '-';
+      } else {
+        board[lastMove.endRow][lastMove.endCol - 2] =
+            board[lastMove.endRow][lastMove.endCol + 1];
+        board[lastMove.endRow][lastMove.endCol + 1] = '-';
+      }
+    }
+
+    this->checkmate = false;
+    this->stalemate = false;
+  }
 }
 
 void GameState::updateCastlingRights(Move move) {
@@ -133,10 +184,8 @@ vector<Move> GameState::getValidMoves() {
         if (possibleMoves[i].pieceMoved != 'K' &&
             possibleMoves[i].pieceMoved != 'k') {
           for (int j = 0; j < validSquares.size(); j++) {
-            bool foundValidSquare = false;
             if (possibleMoves[i].endRow == validSquares[j][0] &&
                 possibleMoves[i].endCol == validSquares[j][1]) {
-              foundValidSquare = true;
               validMoves.push_back(possibleMoves[i]);
               break;
             }
@@ -204,10 +253,7 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
         if (getColorOfPiece(endRow, endCol) == allyColor && endPiece != 'K' &&
             endPiece != 'k') {
           if (possiblePin[0] == -1000 && possiblePin[1] == -1000) {
-            possiblePin[0] = endRow;
-            possiblePin[1] = endCol;
-            possiblePin[2] = direction[0];
-            possiblePin[3] = direction[1];
+            possiblePin = {endRow, endCol, direction[0], direction[1]};
           } else {
             break;
           }
@@ -218,7 +264,7 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
               (i == 1 && type == 'p' &&
                ((enemyColor == 0 && 6 <= j && j <= 7) ||
                 (enemyColor == 1 && 4 <= j && j <= 5))) ||
-              (type == 'q')) {
+              (type == 'q') || (i == 1 && type == 'k')) {
             if (possiblePin[0] == -1000 && possiblePin[1] == -1000) {
               tempInCheck = true;
               checks.push_back({endRow, endCol, direction[0], direction[1]});
@@ -251,7 +297,7 @@ vector<vector<vector<int>>> GameState::getPinsAndChecks() {
     }
   }
 
-  inCheck = tempInCheck;
+  this->inCheck = tempInCheck;
   pinsAndChecks.push_back(pins);
   pinsAndChecks.push_back(checks);
 
@@ -509,10 +555,13 @@ void GameState::getKingMoves(int row, int col, vector<Move> &moves) {
         } else {
           blackKingLocation = {endRow, endCol};
         }
+
         vector<vector<vector<int>>> pinsAndChecks = getPinsAndChecks();
-        if (pinsAndChecks[1].size() == 0) {
+
+        if (!this->inCheck) {
           moves.push_back(Move({row, col}, {endRow, endCol}, board));
         }
+
         if (allyColor == 0) {
           whiteKingLocation = {row, col};
         } else {
@@ -603,6 +652,7 @@ void GameState::parsePosition(string InputFromGUI) {
 }
 
 void GameState::parseFen(string InputFromGUI) {
+  cout << "Parsing FEN..." << endl;
   string fen = InputFromGUI.substr(12, InputFromGUI.length() - 12);
   string moves = "";
   for (int i = 0; i < fen.length(); i++) {
@@ -663,6 +713,7 @@ void GameState::parseFen(string InputFromGUI) {
   } else {
     castleRights[3] = false;
   }
+
   if (moves != "") {
     stringstream ss(moves);
     string token;
@@ -672,6 +723,7 @@ void GameState::parseFen(string InputFromGUI) {
       makeMove(move);
     }
   }
+  cout << "FEN parsed" << endl;
 }
 
 Move GameState::parseMoveToken(string token) {
@@ -708,7 +760,12 @@ Move GameState::parseMoveToken(string token) {
     int endCol = token[2] - 'a';
     int endRow = 7 - (token[3] - '1');
     char promotionPiece = token[4];
-    return Move({startRow, startCol}, {endRow, endCol}, board, false, false,
-                promotionPiece);
+    if (board[startRow][startCol] == 'P') {
+      return Move({startRow, startCol}, {endRow, endCol}, board, false, false,
+                  toupper(promotionPiece));
+    } else {
+      return Move({startRow, startCol}, {endRow, endCol}, board, false, false,
+                  promotionPiece);
+    }
   }
 }

@@ -19,6 +19,8 @@ public:
   int colorToMove;
   // vector<string> moveLog;
   vector<Move> moveLog;
+  vector<vector<int>> enPassantLog;
+  vector<vector<bool>> castleRightsLog;
   vector<int> whiteKingLocation = {7, 4};
   vector<int> blackKingLocation = {0, 4};
   bool inCheck;
@@ -33,6 +35,8 @@ public:
   GameState();
 
   void makeMove(Move move);
+
+  void undoMove();
 
   void updateCastlingRights(Move move);
 

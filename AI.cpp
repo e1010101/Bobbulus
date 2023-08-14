@@ -23,48 +23,13 @@ Move findRandomMove(vector<Move> validMoves) {
 Move findBestMove(GameState myState, vector<Move> validMoves) {
   int score =
       findMoveNegaMax(myState, validMoves, MAX_DEPTH, myState.colorToMove);
-  cout << "Score: " << score << endl;
+  for (int i = 0; i < validMoves.size(); i++) {
+    cout << validMoves[i].getChessNotation() << endl;
+  }
+  cout << "Best move: " << nextMove.getChessNotation() << endl;
+  cout << "Evaluation: " << score << endl;
   return nextMove;
 }
-
-// int findMoveMinMax(GameState myState, vector<Move> validMoves, int depth,
-//                    int colorToMove) {
-//   if (depth == 0) {
-//     return evaluateGameState(myState);
-//   }
-
-//   if (colorToMove == 0) {
-//     int maxScore = -CHECKMATE;
-//     for (int i = 0; i < validMoves.size(); i++) {
-//       GameState newState = myState;
-//       newState.makeMove(validMoves[i]);
-//       vector<Move> opponentMoves = newState.getValidMoves();
-//       int score = findMoveMinMax(newState, opponentMoves, depth - 1, 1);
-//       if (score > maxScore) {
-//         maxScore = score;
-//         if (depth == MAX_DEPTH) {
-//           nextMove = validMoves[i];
-//         }
-//       }
-//     }
-//     return maxScore;
-//   } else {
-//     int minScore = CHECKMATE;
-//     for (int i = 0; i < validMoves.size(); i++) {
-//       GameState newState = myState;
-//       newState.makeMove(validMoves[i]);
-//       vector<Move> opponentMoves2 = newState.getValidMoves();
-//       int score = findMoveMinMax(newState, opponentMoves2, depth - 1, 0);
-//       if (score < minScore) {
-//         minScore = score;
-//         if (depth == MAX_DEPTH) {
-//           nextMove = validMoves[i];
-//         }
-//       }
-//     }
-//     return minScore;
-//   }
-// }
 
 int findMoveNegaMax(GameState myState, vector<Move> validMoves, int depth,
                     int colorToMove) {
@@ -73,21 +38,20 @@ int findMoveNegaMax(GameState myState, vector<Move> validMoves, int depth,
     return turnMultiplier * evaluateGameState(myState);
   }
 
-  int maxScore = -CHECKMATE;
+  int maxScore = -CHECKMATE - 1;
   for (int i = 0; i < validMoves.size(); i++) {
-    GameState newState = myState;
-    newState.makeMove(validMoves[i]);
-    vector<Move> opponentMoves = newState.getValidMoves();
+    myState.makeMove(validMoves[i]);
+    vector<Move> opponentMoves = myState.getValidMoves();
     int score =
-        -findMoveNegaMax(newState, opponentMoves, depth - 1, -colorToMove);
+        -findMoveNegaMax(myState, opponentMoves, depth - 1, -colorToMove);
     if (score > maxScore) {
       maxScore = score;
       if (depth == MAX_DEPTH) {
         nextMove = validMoves[i];
       }
     }
+    myState.undoMove();
   }
-
   return maxScore;
 }
 
