@@ -11,7 +11,7 @@ Move findBestMove(GameState myState, vector<Move> validMoves);
 int findMoveMinMax(GameState myState, vector<Move> validMoves, int depth,
                    int colorToMove);
 
-int findMoveNegaMax(GameState myState, vector<Move> validMoves, int depth,
-                    int colorToMove);
+int findMoveNegaMaxAlphaBeta(GameState myState, vector<Move> validMoves,
+                             int depth, int alpha, int beta, int colorToMove);
 
 int evaluateGameState(GameState myState);

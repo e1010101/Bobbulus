@@ -22,17 +22,18 @@ Move findRandomMove(vector<Move> validMoves) {
 
 Move findBestMove(GameState myState, vector<Move> validMoves) {
   int score =
-      findMoveNegaMax(myState, validMoves, MAX_DEPTH, myState.colorToMove);
-  for (int i = 0; i < validMoves.size(); i++) {
-    cout << validMoves[i].getChessNotation() << endl;
-  }
+      findMoveNegaMaxAlphaBeta(myState, validMoves, MAX_DEPTH, -CHECKMATE,
+                               CHECKMATE, myState.colorToMove);
+  // for (int i = 0; i < validMoves.size(); i++) {
+  //   cout << validMoves[i].getChessNotation() << endl;
+  // }
   cout << "Best move: " << nextMove.getChessNotation() << endl;
   cout << "Evaluation: " << score << endl;
   return nextMove;
 }
 
-int findMoveNegaMax(GameState myState, vector<Move> validMoves, int depth,
-                    int colorToMove) {
+int findMoveNegaMaxAlphaBeta(GameState myState, vector<Move> validMoves,
+                             int depth, int alpha, int beta, int colorToMove) {
   int turnMultiplier = colorToMove == 0 ? 1 : -1;
   if (depth == 0) {
     return turnMultiplier * evaluateGameState(myState);
@@ -42,8 +43,8 @@ int findMoveNegaMax(GameState myState, vector<Move> validMoves, int depth,
   for (int i = 0; i < validMoves.size(); i++) {
     myState.makeMove(validMoves[i]);
     vector<Move> opponentMoves = myState.getValidMoves();
-    int score =
-        -findMoveNegaMax(myState, opponentMoves, depth - 1, -colorToMove);
+    int score = -findMoveNegaMaxAlphaBeta(myState, opponentMoves, depth - 1,
+                                          -beta, -alpha, -colorToMove);
     if (score > maxScore) {
       maxScore = score;
       if (depth == MAX_DEPTH) {
@@ -51,6 +52,12 @@ int findMoveNegaMax(GameState myState, vector<Move> validMoves, int depth,
       }
     }
     myState.undoMove();
+    if (maxScore > alpha) {
+      alpha = maxScore;
+    }
+    if (alpha >= beta) {
+      break;
+    }
   }
   return maxScore;
 }
