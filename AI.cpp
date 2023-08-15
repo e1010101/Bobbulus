@@ -13,6 +13,7 @@ unordered_map<char, int> pieceScore = {
 int CHECKMATE = 1000;
 int STALEMATE = 0;
 int MAX_DEPTH = 2;
+int POSITION_COUNTER = 0;
 Move nextMove = Move({0, 0}, {0, 0}, {{'0'}}, false, false);
 
 Move findRandomMove(vector<Move> validMoves) {
@@ -21,6 +22,7 @@ Move findRandomMove(vector<Move> validMoves) {
 }
 
 Move findBestMove(GameState myState, vector<Move> validMoves) {
+  POSITION_COUNTER = 0;
   int score =
       findMoveNegaMaxAlphaBeta(myState, validMoves, MAX_DEPTH, -CHECKMATE,
                                CHECKMATE, myState.colorToMove);
@@ -29,11 +31,13 @@ Move findBestMove(GameState myState, vector<Move> validMoves) {
   // }
   cout << "Best move: " << nextMove.getChessNotation() << endl;
   cout << "Evaluation: " << score << endl;
+  cout << "Searched " << POSITION_COUNTER << " positions" << endl;
   return nextMove;
 }
 
 int findMoveNegaMaxAlphaBeta(GameState myState, vector<Move> validMoves,
                              int depth, int alpha, int beta, int colorToMove) {
+  POSITION_COUNTER++;
   int turnMultiplier = colorToMove == 0 ? 1 : -1;
   if (depth == 0) {
     return turnMultiplier * evaluateGameState(myState);
