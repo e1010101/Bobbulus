@@ -140,6 +140,24 @@ void GameState::updateCastlingRights(Move move) {
       }
     }
   }
+
+  if (move.pieceCaptured == 'R') {
+    if (move.endRow == 7) {
+      if (move.endCol == 0) {
+        castleRights[1] = false;
+      } else if (move.endCol == 7) {
+        castleRights[0] = false;
+      }
+    }
+  } else if (move.pieceCaptured == 'r') {
+    if (move.endRow == 0) {
+      if (move.endCol == 0) {
+        castleRights[3] = false;
+      } else if (move.endCol == 7) {
+        castleRights[2] = false;
+      }
+    }
+  }
 }
 
 vector<Move> GameState::getValidMoves() {
